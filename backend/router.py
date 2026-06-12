@@ -21,7 +21,7 @@ def haversine_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> fl
 
 class VientianeRouter:
     def __init__(self):
-        # Nodes representing main intersections in central and expanded Vientiane
+        # Nodes representing main intersections in central and expanded Vientiane (Total 41 Nodes)
         self.nodes = {
             "A": {"name": "Quai Fa Ngum (West) - Francois Ngin Jct", "lat": 17.9628, "lng": 102.6075, "elevation": 158.2},
             "B": {"name": "Quai Fa Ngum (Center) - Chao Anou Jct", "lat": 17.9612, "lng": 102.6105, "elevation": 158.8},
@@ -61,7 +61,19 @@ class VientianeRouter:
             "AB": {"name": "Done Koy T4 Junction (Southern Belt Road)", "lat": 17.9650, "lng": 102.6550, "elevation": 170.0},
             "AC": {"name": "Sokpaluang Junction (Kouvieng / Sokpaluang Jct)", "lat": 17.9480, "lng": 102.6250, "elevation": 168.0},
             "AD": {"name": "Wat Nak Junction (Thadeua Rd / Sokpaluang South)", "lat": 17.9380, "lng": 102.6200, "elevation": 161.0},
-            "AE": {"name": "Ban Done Koy Village (Unpaved Outskirts)", "lat": 17.9550, "lng": 102.6450, "elevation": 167.0}
+            "AE": {"name": "Ban Done Koy Village (Unpaved Outskirts)", "lat": 17.9550, "lng": 102.6450, "elevation": 167.0},
+
+            # Hyper-Expanded Nodes (AF - AO)
+            "AF": {"name": "Wattay Airport Passenger Terminal (West Gate)", "lat": 17.9880, "lng": 102.5630, "elevation": 164.0},
+            "AG": {"name": "Ban Wattay Village (Suburban Alleyways)", "lat": 17.9780, "lng": 102.5900, "elevation": 165.0},
+            "AH": {"name": "Phontong Junction (North Road Ring)", "lat": 17.9850, "lng": 102.6150, "elevation": 172.0},
+            "AI": {"name": "Nongtha Lake Jct (North Eco Park)", "lat": 17.9990, "lng": 102.6080, "elevation": 170.0},
+            "AJ": {"name": "Phonxay East Jct (Phonxay Residential)", "lat": 17.9750, "lng": 102.6300, "elevation": 172.0},
+            "AK": {"name": "Ban That Luang Kang (Temple Suburbs)", "lat": 17.9750, "lng": 102.6410, "elevation": 174.0},
+            "AL": {"name": "Sokpaluang Forest Park (Green Zone)", "lat": 17.9550, "lng": 102.6200, "elevation": 169.0},
+            "AM": {"name": "Done Koy East Jct (Residential Hub)", "lat": 17.9580, "lng": 102.6500, "elevation": 168.0},
+            "AN": {"name": "Wat Nak West Jct (Lower Mekong Bank)", "lat": 17.9430, "lng": 102.6120, "elevation": 159.0},
+            "AO": {"name": "Ban Phonsinuan (Inland Housing Estate)", "lat": 17.9650, "lng": 102.6250, "elevation": 171.0}
         }
         
         # Edges (Road links). Bidirectional for simplification, but can have unique weights.
@@ -106,7 +118,7 @@ class VientianeRouter:
             
             # Expanded Eastward & Airport Road Connections
             {"u": "N", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"},
-            {"u": "S", "v": "U", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"}, # Sikhay to Airport
+            {"u": "S", "v": "U", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"}, 
             {"u": "I", "v": "R", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
             {"u": "R", "v": "Q", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
             {"u": "H", "v": "R", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
@@ -116,25 +128,54 @@ class VientianeRouter:
             {"u": "T", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
 
             # Metropolitan Core Arteries (U - AE Connections)
-            {"u": "I", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Patuxai to Phonxay Jct
-            {"u": "X", "v": "W", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Phonxay to T4 Jct
-            {"u": "W", "v": "V", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # T4 Jct to Dongdok (NUOL)
-            {"u": "R", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # Nongbone to Phonxay
-            {"u": "Q", "v": "W", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # That Luang to Kaysone
-            {"u": "Q", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # That Luang to Phonthan
+            {"u": "I", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "X", "v": "W", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "W", "v": "V", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "R", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"},
+            {"u": "Q", "v": "W", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"},
+            {"u": "Q", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
             
-            {"u": "P", "v": "AC", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Talat Sao to Sokpaluang
-            {"u": "P", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Talat Sao to Phonthan
-            {"u": "AC", "v": "AD", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"}, # Sokpaluang to Wat Nak
-            {"u": "AD", "v": "AA", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"}, # Wat Nak to Chinaimo (low-lying)
-            {"u": "AA", "v": "Z", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"}, # Chinaimo to Border Gateway (low-lying)
-            {"u": "Z", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Border Gateway to T4 Done Koy
-            {"u": "AB", "v": "W", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # T4 Done Koy to Kaysone Jct
-            {"u": "Y", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Phonthan to T4 Jct
+            {"u": "P", "v": "AC", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "P", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
+            {"u": "AC", "v": "AD", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"},
+            {"u": "AD", "v": "AA", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"},
+            {"u": "AA", "v": "Z", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"},
+            {"u": "Z", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
+            {"u": "AB", "v": "W", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
+            {"u": "Y", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
             
             # Suburban Unpaved Road Simulation (Done Koy Village)
-            {"u": "Y", "v": "AE", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"}, # Mud hazard in wet season
-            {"u": "AE", "v": "AB", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"} # Mud hazard in wet season
+            {"u": "Y", "v": "AE", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
+            {"u": "AE", "v": "AB", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
+
+            # Hyper-Expanded Local Connectors (AF - AO)
+            {"u": "AF", "v": "U", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"}, # Terminal to Sikhay
+            {"u": "AF", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"}, # Terminal to Airport Blvd
+            {"u": "AG", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Village to Airport Blvd
+            {"u": "AG", "v": "N", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"}, # Muddy Village path to Samsenthai
+            
+            {"u": "AI", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Nongtha to Souphanouvong
+            {"u": "AI", "v": "AH", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Nongtha to Phontong
+            {"u": "AH", "v": "I", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Phontong to Patuxai
+            {"u": "AH", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # Phontong to Phonxay
+            
+            {"u": "AJ", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # Phonxay East to Phonxay
+            {"u": "AJ", "v": "R", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # Phonxay East to Nongbone
+            {"u": "AJ", "v": "Q", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # Phonxay East to That Luang
+            {"u": "AK", "v": "Q", "surface": "unpaved", "telemetry_id": "Lane_Xang_Ave", "type": "alley"}, # Behind temple to That Luang Plaza
+            {"u": "AK", "v": "W", "surface": "unpaved", "telemetry_id": "Lane_Xang_Ave", "type": "alley"}, # Behind temple to Kaysone
+            
+            {"u": "AL", "v": "AC", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"}, # Forest Park to Sokpaluang
+            {"u": "AL", "v": "AD", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"}, # Forest Park to Wat Nak
+            {"u": "AM", "v": "AE", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"}, # Done Koy Village East to Center
+            {"u": "AM", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Done Koy Village East to T4 Jct
+            
+            {"u": "AN", "v": "AD", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"}, # Wat Nak West to Wat Nak Jct
+            {"u": "AN", "v": "A", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "secondary"}, # Wat Nak West to Mekong West
+            
+            {"u": "AO", "v": "G", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Phonsinuan to Samsenthai G
+            {"u": "AO", "v": "H", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Phonsinuan to Samsenthai H
+            {"u": "AO", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}  # Phonsinuan to Phonthan Jct
         ]
         
         # Hydrate base distances
@@ -143,7 +184,7 @@ class VientianeRouter:
             n2 = self.nodes[edge["v"]]
             edge["distance"] = haversine_distance(n1["lat"], n1["lng"], n2["lat"], n2["lng"])
 
-    def get_adjacency_list(self, vehicle: str, telemetry_data: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+    def get_adjacency_list(self, vehicle: str, telemetry_data: Dict[str, Any], hazards: List[str] = None) -> Dict[str, List[Dict[str, Any]]]:
         """
         Generates an adjacency list where weights are adjusted based on:
         - Surface type penalties (specifically for tuk-tuks)
@@ -204,6 +245,10 @@ class VientianeRouter:
             if surface == "unpaved":
                 weight *= unpaved_penalty
                 
+            # Apply user reported hazard penalty (e.g. accident, road block, pothole)
+            if hazards and (u in hazards or v in hazards):
+                weight *= 20.0 # 2000% weight penalty to bypass the hazard area
+                
             # Apply water depth weight penalty (even if passable, vehicle must slow down)
             if flood_depth > 0.02:
                 # As water depth approaches the safety threshold, speed approaches 10% of standard speed,
@@ -218,7 +263,7 @@ class VientianeRouter:
             
         return adj
 
-    def solve_route(self, start: str, end: str, vehicle: str, telemetry_data: Dict[str, Any]) -> Dict[str, Any]:
+    def solve_route(self, start: str, end: str, vehicle: str, telemetry_data: Dict[str, Any], hazards: List[str] = None) -> Dict[str, Any]:
         """
         Runs Dijkstra's algorithm to find the safest, fastest route.
         Returns a dict containing coordinates, path, total distance, and routing remarks.
@@ -226,7 +271,7 @@ class VientianeRouter:
         if start not in self.nodes or end not in self.nodes:
             return {"error": "Invalid start or end node"}
             
-        adj = self.get_adjacency_list(vehicle, telemetry_data)
+        adj = self.get_adjacency_list(vehicle, telemetry_data, hazards)
         
         # Priority queue stores tuples of (current_weight, current_node, path_history)
         pq = [(0.0, start, [start])]
@@ -244,9 +289,12 @@ class VientianeRouter:
                 total_dist = 0.0
                 max_water_encountered = 0.0
                 unpaved_traversed = False
+                hazard_encountered = False
                 
                 for i in range(len(path) - 1):
                     u_node, v_node = path[i], path[i+1]
+                    if hazards and (u_node in hazards or v_node in hazards):
+                        hazard_encountered = True
                     # Find matching edge in original list to retrieve stats
                     for edge in self.edges:
                         if (edge["u"] == u_node and edge["v"] == v_node) or (edge["u"] == v_node and edge["v"] == u_node):
@@ -261,6 +309,8 @@ class VientianeRouter:
                     remarks.append(f"주의: 최대 {max_water_encountered:.2f}m 깊이의 침수 도로 구간을 통과합니다.")
                 if unpaved_traversed:
                     remarks.append("경로에 진흙 유실 위험이 높은 비포장도로가 포함되어 있습니다.")
+                if hazard_encountered:
+                    remarks.append("경로에 실시간 제보된 장애물(사고/포트홀/통제) 구역이 포함되어 있습니다. 서행하십시오.")
                 if not remarks:
                     remarks.append("포장 완료된 안전한 건조 도로 위주의 최적 경로입니다.")
                     
@@ -297,6 +347,67 @@ class VientianeRouter:
                     heapq.heappush(pq, (current_weight + edge_weight, target, path + [target]))
                     
         return {"error": "안전한 대피 경로를 찾을 수 없습니다. 모든 진입로가 심각한 홍수로 차단되었습니다."}
+
+    def find_nearest_shelter(self, start: str, vehicle: str, telemetry_data: Dict[str, Any], hazards: List[str] = None) -> Dict[str, Any]:
+        """
+        Searches all designated safe shelter nodes (I, Q, V, P) from the start node,
+        calculates the flood-safe route to each, and returns the one with the shortest path.
+        """
+        shelter_nodes = {
+            "I": "빠뚜사이 고지대 대피소 (Patuxai Shelter)",
+            "Q": "탓루앙 황금사원 대피소 (That Luang Shelter)",
+            "V": "동독 국립대학교 체육관 대피소 (Dongdok NUOL Shelter)",
+            "P": "딸랏싸오 몰 고지대 대피소 (Talat Sao Shelter)"
+        }
+        
+        best_route = None
+        best_shelter_id = None
+        min_weight = float('inf')
+        
+        # Calculate routes to all shelters
+        for shelter_id, shelter_name in shelter_nodes.items():
+            if start == shelter_id:
+                # Already at shelter!
+                return {
+                    "success": True,
+                    "shelter_id": shelter_id,
+                    "shelter_name": shelter_name,
+                    "distance_m": 0.0,
+                    "path": [start],
+                    "remarks": ["현재 대피소에 안전하게 위치해 있습니다."],
+                    "geojson": {
+                        "type": "Feature",
+                        "properties": {
+                            "vehicle": vehicle,
+                            "distance_m": 0.0,
+                            "max_water_depth": 0.0,
+                            "remarks": "현재 대피소에 안전하게 위치해 있습니다."
+                        },
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": [[self.nodes[start]["lng"], self.nodes[start]["lat"]]]
+                        }
+                    }
+                }
+            
+            # Solve routing
+            route = self.solve_route(start, shelter_id, vehicle, telemetry_data, hazards)
+            if "error" not in route:
+                # Sum path weights to find the best route
+                dist = route["distance_m"]
+                if dist < min_weight:
+                    min_weight = dist
+                    best_route = route
+                    best_shelter_id = shelter_id
+                    
+        if best_route:
+            best_route["shelter_id"] = best_shelter_id
+            best_route["shelter_name"] = shelter_nodes[best_shelter_id]
+            best_route["remarks"] = [f"인근 {shelter_nodes[best_shelter_id]}로 대피하는 긴급 경로를 안내합니다."] + best_route["remarks"]
+            best_route["geojson"]["properties"]["remarks"] = f"긴급 대피: {shelter_nodes[best_shelter_id]} | " + best_route["geojson"]["properties"]["remarks"]
+            return best_route
+            
+        return {"error": "안전한 대피로가 존재하지 않습니다! 모든 고지대 진입로가 침수되어 고립되었습니다. 즉시 높은 건물 옥상 등으로 대피하십시오."}
 
 # Singleton instance of Vientiane Router
 vientiane_router = VientianeRouter()

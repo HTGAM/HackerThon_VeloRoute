@@ -4,6 +4,8 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, List, Any
+from pydantic import BaseModel
+from datetime import datetime
 
 # Import simulator and router modules
 from telemetry import telemetry_pipeline
@@ -14,6 +16,16 @@ app = FastAPI(
     description="Real-Time Flood-Resilient Routing and Telemetry Engine for Vientiane, Laos",
     version="1.0.0"
 )
+
+# InMemory hazard reports store
+reported_hazards: List[Dict[str, Any]] = []
+
+class HazardReport(BaseModel):
+    node: str
+    hazard_type: str  # 'flood', 'accident', 'pothole', 'police'
+
+class HazardRemove(BaseModel):
+    node: str
 
 # Enable CORS for React Frontend integration
 app.add_middleware(
@@ -52,8 +64,8 @@ def get_telemetry(
 
 @app.get("/api/route")
 def get_route(
-    start: str = Query("A", description="Starting intersection node (A-L)"),
-    end: str = Query("I", description="Ending intersection node (A-L)"),
+    start: str = Query("A", description="Starting intersection node (A-AO)"),
+    end: str = Query("I", description="Ending intersection node (A-AO)"),
     vehicle: str = Query("tuktuk", description="Vehicle type: tuktuk, motorcycle, car"),
     rain_intensity: float = Query(0.0, description="Precipitation intensity (mm/h)"),
     river_level: float = Query(9.5, description="Mekong river level (meters)")
@@ -65,8 +77,11 @@ def get_route(
         # 1. Generate live telemetry based on environment variables
         flood_telemetry = telemetry_pipeline.calculate_inundation(rain_intensity, river_level)
         
-        # 2. Run the dynamic graph routing algorithm
-        route_result = vientiane_router.solve_route(start, end, vehicle, flood_telemetry)
+        # 2. Extract hazard node IDs
+        hazards = [h["node"] for h in reported_hazards]
+        
+        # 3. Run the dynamic graph routing algorithm with hazards
+        route_result = vientiane_router.solve_route(start, end, vehicle, flood_telemetry, hazards)
         
         if "error" in route_result:
             return {
@@ -88,6 +103,72 @@ def get_route(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/evacuate")
+def get_evacuate(
+    start: str = Query("A", description="Starting intersection node (A-AO)"),
+    vehicle: str = Query("tuktuk", description="Vehicle type: tuktuk, motorcycle, car"),
+    rain_intensity: float = Query(0.0, description="Precipitation intensity (mm/h)"),
+    river_level: float = Query(9.5, description="Mekong river level (meters)")
+):
+    """
+    Calculates the quickest flood-safe evacuation route to the nearest high-ground shelter.
+    """
+    try:
+        flood_telemetry = telemetry_pipeline.calculate_inundation(rain_intensity, river_level)
+        hazards = [h["node"] for h in reported_hazards]
+        
+        route_result = vientiane_router.find_nearest_shelter(start, vehicle, flood_telemetry, hazards)
+        
+        if "error" in route_result:
+            return {
+                "success": False,
+                "error": route_result["error"],
+                "rain_intensity": rain_intensity,
+                "river_level": river_level,
+                "vehicle": vehicle
+            }
+            
+        return route_result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/report-hazard")
+def report_hazard(report: HazardReport):
+    if report.node not in vientiane_router.nodes:
+        raise HTTPException(status_code=400, detail="Invalid node ID")
+        
+    existing = next((h for h in reported_hazards if h["node"] == report.node), None)
+    if existing:
+        existing["hazard_type"] = report.hazard_type
+        existing["timestamp"] = datetime.now().isoformat()
+    else:
+        reported_hazards.append({
+            "node": report.node,
+            "hazard_type": report.hazard_type,
+            "timestamp": datetime.now().isoformat()
+        })
+    return {"success": True, "message": f"Node {report.node}에 장애물이 제보되었습니다."}
+
+@app.get("/api/hazards")
+def get_hazards():
+    return reported_hazards
+
+@app.post("/api/hazards/clear")
+def clear_hazards():
+    global reported_hazards
+    reported_hazards.clear()
+    return {"success": True, "message": "모든 제보된 장애물이 제거되었습니다."}
+
+@app.post("/api/hazards/remove")
+def remove_hazard(request: HazardRemove):
+    global reported_hazards
+    before_len = len(reported_hazards)
+    reported_hazards = [h for h in reported_hazards if h["node"] != request.node]
+    after_len = len(reported_hazards)
+    if before_len == after_len:
+        raise HTTPException(status_code=404, detail=f"Node {request.node}에 등록된 장애물이 없습니다.")
+    return {"success": True, "message": f"Node {request.node}의 장애물이 성공적으로 해제되었습니다."}
 
 @app.get("/api/flood-zones")
 def get_flood_zones(

@@ -80,5 +80,26 @@ class TestVientianeRoutingSystem(unittest.TestCase):
         self.assertIn("error", route)
         print(f"[PASS] Verified extreme flood handling error: {route['error']}")
 
+    def test_hazard_avoidance_routing(self):
+        """
+        Under dry conditions:
+        - Route from node A to node I.
+        - The standard dry route is A -> B -> C -> D -> H -> I.
+        - If node B has a reported hazard (e.g., accident), the router should apply a heavy penalty
+          to node B and calculate a detour path (e.g. A -> E -> ...) that bypasses B.
+        """
+        dry_conditions = self.telemetry.calculate_inundation(rain_intensity_mm=0.0, mekong_river_level_meters=9.5)
+        
+        # 1. Without hazards (should choose B)
+        normal_route = self.router.solve_route("A", "I", "tuktuk", dry_conditions, hazards=[])
+        self.assertTrue(normal_route["success"])
+        self.assertIn("B", normal_route["path"])
+        
+        # 2. With hazard at node B (should bypass B)
+        detour_route = self.router.solve_route("A", "I", "tuktuk", dry_conditions, hazards=["B"])
+        self.assertTrue(detour_route["success"])
+        self.assertNotIn("B", detour_route["path"])
+        print(f"[PASS] Verified hazard detour route (avoiding B): {detour_route['path']}")
+
 if __name__ == "__main__":
     unittest.main()
