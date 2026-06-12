@@ -1,5 +1,7 @@
 # VeloRoute Vientiane: FastAPI Gateway Server
 # Architecture Focus: Serves real-time dynamic routing and flood zone overlays as GeoJSON to the client.
+import os
+print("!!! ACTUAL LOADED MAIN.PY PATH:", os.path.abspath(__file__))
 
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

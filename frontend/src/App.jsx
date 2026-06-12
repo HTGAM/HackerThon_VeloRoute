@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 // API Configuration
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'http://localhost:8001';
 
 // Central Vientiane coordinates
 const MAP_CENTER = [17.9642, 102.6120];
