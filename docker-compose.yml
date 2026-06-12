@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # OSRM Routing Engine loaded with Laos OSM Data and customized Tuk-Tuk profile
+  osrm-backend:
+    build:
+      context: ./backend/osrm
+      dockerfile: Dockerfile.osrm
+    container_name: veloroute-osrm
+    ports:
+      - "5000:5000"
+    restart: always
+
+  # Python telemetry pipeline and flood-aware Dijkstra/A* routing API
+  routing-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: veloroute-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - osrm-backend
+    restart: always
+
+  # React Leaflet live mapping and environment simulation frontend dashboard
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: veloroute-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - routing-api
+    restart: always

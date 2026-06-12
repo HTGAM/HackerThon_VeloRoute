@@ -1,0 +1,30 @@
+# Dockerfile for VeloRoute Vientiane OSRM Routing Engine
+# Architecture Focus: Auto-downloads Laos map data and processes it using our unpaved-avoiding Tuk-Tuk profile.
+
+FROM osrm/osrm-backend:v5.27.1
+
+# Install wget to download Geofabrik OSM data
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
+# Set up data directory
+WORKDIR /data
+
+# Download Laos OSM data (very lightweight: ~15MB)
+RUN wget -O laos-latest.osm.pbf https://download.geofabrik.de/asia/laos-latest.osm.pbf
+
+# Copy the custom Tuk-Tuk routing profile
+COPY tuktuk.lua /data/tuktuk.lua
+
+# Pre-process OSM data using the custom profile
+# 1. Extract routing data
+RUN osrm-extract -p /data/tuktuk.lua /data/laos-latest.osm.pbf
+# 2. Partition for multi-level Dijkstra (MLD)
+RUN osrm-partition /data/laos-latest.osrm
+# 3. Customize speeds based on cells and traffic weights
+RUN osrm-customize /data/laos-latest.osrm
+
+# Expose OSRM HTTP routing server port
+EXPOSE 5000
+
+# Start OSRM HTTP server
+ENTRYPOINT ["osrm-routed", "--algorithm", "mld", "/data/laos-latest.osrm"]
