@@ -38,14 +38,35 @@ const NODE_LABELS = {
   "I": "빠뚜사이 독립기념탑 (Patuxai Monument)",
   "J": "셋타티랏 중앙 (Setthathilath / Chao Anou 교차로)",
   "K": "셋타티랏 동부 (Setthathilath / Pangkham 교차로)",
-  "L": "차오아누 골목길 (비포장 지름길 Shortcut)"
+  "L": "차오아누 골목길 (비포장 지름길 Shortcut)",
+  
+  // Metropolitan Expanded Nodes (U - AE)
+  "M": "메콩강변 서서부 (Quai Fa Ngum / Khoun Boulom 교차로)",
+  "N": "삼센타이 서서부 (Samsenthai / Khoun Boulom 교차로)",
+  "O": "셋타티랏 서서부 (Setthathilath / Khoun Boulom 교차로)",
+  "P": "딸랏싸오 아침시장 (Talat Sao Mall / Lane Xang 남부)",
+  "Q": "탓루앙 황금사원 (That Luang Stupa 광장)",
+  "R": "농본 교차로 (Nongbone Rd / That Luang Rd Jct)",
+  "S": "수파누봉 대로 (Souphanouvong Blvd / 공항 방향 대로)",
+  "T": "헹분 거리 (Rue Hengboun 비포장 야시장 골목)",
+  "U": "식하이 교차로 (Sikhay Jct / 공항 서부 대로)",
+  "V": "동독 국립대학교 캠퍼스 (Dongdok / NUOL)",
+  "W": "란쌍-T4 북부 교차로 (Kaysone Jct / T4 North)",
+  "X": "폰사이 교차로 (Phonxay Jct / Patuxai 북부)",
+  "Y": "폰탄 교차로 (Phonthan Jct / 동부 주거지)",
+  "Z": "타데아 교차로 (Thadeua Jct / 우정의 다리 국경 게이트)",
+  "AA": "치나이모 교차로 (Chinaimo Jct / 메콩강 남부 군사학교)",
+  "AB": "돈꼬이 T4 교차로 (Done Koy / T4 Center)",
+  "AC": "속팔루앙 교차로 (Sokpaluang / Kouvieng Jct)",
+  "AD": "왓낙 강변 교차로 (Wat Nak Jct / Thadeua Rd)",
+  "AE": "돈꼬이 외곽 마을 (Done Koy Village / 비포장 외곽 주거지)"
 };
 
 // Map center adjuster helper component
 function MapController({ center }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, 15);
+    map.setView(center, 13); // Changed zoom from 15 to 13 to support wider viewport
   }, [center, map]);
   return null;
 }
@@ -324,7 +345,7 @@ export default function App() {
         {/* Mapbox/Leaflet rendering */}
         <MapContainer 
           center={MAP_CENTER} 
-          zoom={15} 
+          zoom={13} // Set default viewport zoom to 13 to view the expanded metropolitan map
           scrollWheelZoom={true}
           style={{ width: '100%', height: '100%' }}
         >

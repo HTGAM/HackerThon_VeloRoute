@@ -40,7 +40,7 @@ class VientianeRouter:
             
             "L": {"name": "Chao Anou Alleyway (Unpaved)", "lat": 17.9658, "lng": 102.6095, "elevation": 169.8},
 
-            # Expanded Nodes (M - T)
+            # Expanded Core Nodes (M - T)
             "M": {"name": "Quai Fa Ngum - Khoun Boulom Jct (Far West Riverfront)", "lat": 17.9645, "lng": 102.6045, "elevation": 158.0},
             "N": {"name": "Samsenthai - Khoun Boulom Jct (Far West Inland)", "lat": 17.9678, "lng": 102.6048, "elevation": 169.5},
             "O": {"name": "Setthathilath - Khoun Boulom Jct (Far West Mid)", "lat": 17.9652, "lng": 102.6047, "elevation": 163.0},
@@ -48,7 +48,20 @@ class VientianeRouter:
             "Q": {"name": "That Luang Golden Stupa (Northeast Plateau)", "lat": 17.9735, "lng": 102.6360, "elevation": 175.5},
             "R": {"name": "Nongbone Rd - That Luang Rd Jct (Northeast)", "lat": 17.9715, "lng": 102.6265, "elevation": 173.0},
             "S": {"name": "Souphanouvong Boulevard (Airport Highway)", "lat": 17.9692, "lng": 102.5975, "elevation": 168.0},
-            "T": {"name": "Rue Hengboun Night Market Street (Alley)", "lat": 17.9668, "lng": 102.6090, "elevation": 169.0}
+            "T": {"name": "Rue Hengboun Night Market Street (Alley)", "lat": 17.9668, "lng": 102.6090, "elevation": 169.0},
+
+            # Metropolitan Expanded Nodes (U - AE)
+            "U": {"name": "Sikhay Jct (Luang Prabang Rd / T2 West)", "lat": 17.9850, "lng": 102.5720, "elevation": 166.0},
+            "V": {"name": "Dongdok NUOL Campus (North University)", "lat": 18.0280, "lng": 102.6390, "elevation": 176.0},
+            "W": {"name": "Kaysone Jct / T4 North (Northern Entrance)", "lat": 17.9980, "lng": 102.6450, "elevation": 174.0},
+            "X": {"name": "Phonxay Jct (Kaysone Phomvihane Ave / North Patuxai)", "lat": 17.9780, "lng": 102.6250, "elevation": 173.0},
+            "Y": {"name": "Phonthan Junction (East Residential Hub)", "lat": 17.9620, "lng": 102.6350, "elevation": 171.0},
+            "Z": {"name": "Thadeua Junction (Lao-Thai Bridge Gateway)", "lat": 17.9350, "lng": 102.6650, "elevation": 163.0},
+            "AA": {"name": "Chinaimo Junction (Military Academy / Mekong South)", "lat": 17.9250, "lng": 102.6450, "elevation": 160.0},
+            "AB": {"name": "Done Koy T4 Junction (Southern Belt Road)", "lat": 17.9650, "lng": 102.6550, "elevation": 170.0},
+            "AC": {"name": "Sokpaluang Junction (Kouvieng / Sokpaluang Jct)", "lat": 17.9480, "lng": 102.6250, "elevation": 168.0},
+            "AD": {"name": "Wat Nak Junction (Thadeua Rd / Sokpaluang South)", "lat": 17.9380, "lng": 102.6200, "elevation": 161.0},
+            "AE": {"name": "Ban Done Koy Village (Unpaved Outskirts)", "lat": 17.9550, "lng": 102.6450, "elevation": 167.0}
         }
         
         # Edges (Road links). Bidirectional for simplification, but can have unique weights.
@@ -58,24 +71,24 @@ class VientianeRouter:
             {"u": "A", "v": "B", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"},
             {"u": "B", "v": "C", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"},
             {"u": "C", "v": "D", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "primary"},
-            {"u": "M", "v": "A", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"}, # Westward riverfront
+            {"u": "M", "v": "A", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"},
             
             # Setthathilath Road - mid-level inland
             {"u": "A", "v": "J", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"},
             {"u": "J", "v": "K", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"},
             {"u": "K", "v": "D", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"},
-            {"u": "O", "v": "J", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"}, # Westward setthathilath
+            {"u": "O", "v": "J", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"},
             
             # Samsenthai Road - high inland arterial (very safe)
             {"u": "E", "v": "F", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "congested"},
             {"u": "F", "v": "G", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
             {"u": "G", "v": "H", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
-            {"u": "N", "v": "E", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Westward Samsenthai
+            {"u": "N", "v": "E", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
             
             # Lane Xang Avenue - primary high-ground artery towards Patuxai & Morning Market
             {"u": "D", "v": "H", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
             {"u": "H", "v": "I", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
-            {"u": "H", "v": "P", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Connecting to Morning Market
+            {"u": "H", "v": "P", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
             {"u": "D", "v": "P", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"},
             
             # Transverse connection streets (elevated slope running riverwards to inland)
@@ -84,22 +97,44 @@ class VientianeRouter:
             {"u": "J", "v": "F", "surface": "paved", "telemetry_id": "Chao_Anou_North", "type": "residential"},
             {"u": "C", "v": "K", "surface": "paved", "telemetry_id": "Pangkham_South", "type": "residential"},
             {"u": "K", "v": "G", "surface": "paved", "telemetry_id": "Pangkham_North", "type": "residential"},
-            {"u": "M", "v": "O", "surface": "paved", "telemetry_id": "Chao_Anou_South", "type": "residential"}, # Khoun Boulom South (slope)
-            {"u": "O", "v": "N", "surface": "paved", "telemetry_id": "Chao_Anou_North", "type": "residential"}, # Khoun Boulom North (slope)
+            {"u": "M", "v": "O", "surface": "paved", "telemetry_id": "Chao_Anou_South", "type": "residential"},
+            {"u": "O", "v": "N", "surface": "paved", "telemetry_id": "Chao_Anou_North", "type": "residential"},
             
             # Unpaved shortcut (demonstrating Tuk-Tuk unpaved avoidance)
             {"u": "E", "v": "L", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
             {"u": "L", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
             
             # Expanded Eastward & Airport Road Connections
-            {"u": "N", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"}, # Airport Road
-            {"u": "I", "v": "R", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Patuxai to Nongbone Jct
-            {"u": "R", "v": "Q", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Nongbone to That Luang
-            {"u": "H", "v": "R", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Samsenthai to Nongbone
+            {"u": "N", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"},
+            {"u": "S", "v": "U", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"}, # Sikhay to Airport
+            {"u": "I", "v": "R", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "R", "v": "Q", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "H", "v": "R", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
             
             # Expanded Alleys (Night Market shortcut)
             {"u": "N", "v": "T", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
-            {"u": "T", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"} # Unpaved night market alley
+            {"u": "T", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
+
+            # Metropolitan Core Arteries (U - AE Connections)
+            {"u": "I", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Patuxai to Phonxay Jct
+            {"u": "X", "v": "W", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Phonxay to T4 Jct
+            {"u": "W", "v": "V", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # T4 Jct to Dongdok (NUOL)
+            {"u": "R", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # Nongbone to Phonxay
+            {"u": "Q", "v": "W", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"}, # That Luang to Kaysone
+            {"u": "Q", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # That Luang to Phonthan
+            
+            {"u": "P", "v": "AC", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"}, # Talat Sao to Sokpaluang
+            {"u": "P", "v": "Y", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Talat Sao to Phonthan
+            {"u": "AC", "v": "AD", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"}, # Sokpaluang to Wat Nak
+            {"u": "AD", "v": "AA", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"}, # Wat Nak to Chinaimo (low-lying)
+            {"u": "AA", "v": "Z", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "secondary"}, # Chinaimo to Border Gateway (low-lying)
+            {"u": "Z", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Border Gateway to T4 Done Koy
+            {"u": "AB", "v": "W", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # T4 Done Koy to Kaysone Jct
+            {"u": "Y", "v": "AB", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"}, # Phonthan to T4 Jct
+            
+            # Suburban Unpaved Road Simulation (Done Koy Village)
+            {"u": "Y", "v": "AE", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"}, # Mud hazard in wet season
+            {"u": "AE", "v": "AB", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"} # Mud hazard in wet season
         ]
         
         # Hydrate base distances
