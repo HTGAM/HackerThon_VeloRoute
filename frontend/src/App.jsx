@@ -183,7 +183,12 @@ const TRANSLATIONS = {
     alert_caut_title: "⚡ 기상 주의보: 노면 미끄러움 및 지름길 차단 우려",
     alert_caut_msg: "“진흙탕 지름길은 당신의 시간을 지르지 못하고 오히려 삼켜 버립니다.” 야시장 야외 지름길 등 비포장도로는 폭우 시 바퀴가 빠지는 진흙 늪이 되어 전복 위험을 높입니다. 안전이 입증된 큰길로 서행하십시오.",
     alert_norm_title: "☀️ 기상 상황: 안전하고 원활한 운행 환경",
-    alert_norm_msg: "“돌다리도 두드려보고 건너라” 했습니다. 기상이 양호하여 운행이 원활하지만, 갑작스러운 노면 변화에 대비하여 항상 규정 속도를 지키고 안전거리를 확보하시기 바랍니다."
+    alert_norm_msg: "“돌다리도 두드려보고 건너라” 했습니다. 기상이 양호하여 운행이 원활하지만, 갑작스러운 노면 변화에 대비하여 항상 규정 속도를 지키고 안전거리를 확보하시기 바랍니다.",
+    physics_title: "실시간 도로 역학 물리 분석 (Physics)",
+    physics_grip: "타이어 접지 마찰력 잔여율",
+    physics_buoyancy: "차량 침수 부력 (Fb)",
+    physics_vlimit: "안전 선회 속도 (R=15m 임계치)",
+    physics_drag: "메콩강 횡류 유체 저항력 (Fd)"
   },
   lo: {
     brand_title: "ເວໂລຣູດ ວຽງຈັນ",
@@ -248,7 +253,12 @@ const TRANSLATIONS = {
     alert_caut_title: "⚡ ແຈ້ງເຕືອນລະວັງ: ຖະໜົນມື່ນ ແລະ ຄວາມສ່ຽງທາງລັດຖືກຕັດຂາດ",
     alert_caut_msg: "“ທາງລັດທີ່ເປັນຕົມບໍ່ໄດ້ຊ່ວຍປະຢັດເວລາຂອງທ່ານ, ແຕ່ມັນຈະກືນກິນເວລາຂອງທ່ານ.” ທາງລັດດິນແດງ ເຊັ່ນ ທາງຫຼັງຕະຫຼາດກາງຄືນ ອາດຈະກາຍເປັນຕົມເລິກໃນເວລາຝົນຕົກໜັກ ເຮັດໃຫ້ລົດຕິດຫຼົ່ມ ແລະ ເພີ່ມຄວາມສ່ຽງຕໍ່ການຂ້ຳ. ກະລຸນາຂັບຂີ່ຢ່າງຊ້າໆ ໃນເສັ້ນທາງໃຫຍ່ທີ່ປອດໄພ.",
     alert_norm_title: "☀️ ສະພາບອາກາດ: ສະພາບແວດລ້ອມການເດີນທາງປອດໄພ ແລະ ສະດວກ",
-    alert_norm_msg: "ມີຄຳເວົ້າທີ່ວ່າ '້າມຂົວຫີນກໍຕ້ອງເຄาະເບິ່ງກ່ອນ'. ເຖິງວ່າສະພາບອາກາດຈະດີ ແລະ ການຈໍລະຈອນສະດວກ, ແຕ່ກະລຸນາປະຕິບັດຕາມຄວາມໄວທີ່ກຳນົດ ແລະ ຮັກສາໄລຍະຫ່າງທີ່ປອດໄພສະເໝີ ເພື່ອຮັບມືກັບການປ່ຽນແປງຂອງສະພາບຖະໜົນທີ່ບໍ່ຄາດຄິດ."
+    alert_norm_msg: "ມີຄຳເວົ້າທີ່ວ່າ '້າມຂົວຫີນກໍຕ້ອງເຄาະເບິ່ງກ່ອນ'. ເຖິງວ່າສະພາບອາກາດຈະດີ ແລະ ການຈໍລະຈອນສະດວກ, ແຕ່ກະລຸນາປະຕິບັດຕາມຄວາມໄວທີ່ກຳນົດ ແລະ ຮັກສາໄລຍະຫ່າງທີ່ປອດໄພສະເໝີ ເພື່ອຮັບມືກັບການປ່ຽນແປງຂອງສະພາບຖະໜົນທີ່ບໍ່ຄາດຄິດ.",
+    physics_title: "ການວິເຄາະຟີຊິກໄຮໂດຣເມຄານິກທັນເວລາ (Physics)",
+    physics_grip: "ອັດຕາແຮງຍຶດເກາະຢາງຍັງເຫຼືອ",
+    physics_buoyancy: "ແຮງຟູຈາກນ້ຳຖ້ວມ (Fb)",
+    physics_vlimit: "ຄວາມໄວຈຳກັດການລ້ຽວ (R=15m)",
+    physics_drag: "ແຮງຕ້ານທາງຂ້າງແມ່ນ້ຳຂອງ (Fd)"
   }
 };
 
@@ -538,6 +548,54 @@ export default function App() {
     }
     return text;
   };
+
+  // Vehicle-specific physics parameters for hydromechanical simulation
+  const VEHICLE_PHYSICS = {
+    tuktuk: { mass: 350, maxVol: 0.35, limitDepth: 0.15, area: 1.2, cd: 0.9 },
+    motorcycle: { mass: 120, maxVol: 0.08, limitDepth: 0.22, area: 0.6, cd: 0.7 },
+    car: { mass: 1500, maxVol: 1.5, limitDepth: 0.40, area: 2.2, cd: 0.4 }
+  };
+
+  // Real-time physics engine calculation
+  const calculatePhysics = (vehicleType, maxDepth) => {
+    const specs = VEHICLE_PHYSICS[vehicleType] || VEHICLE_PHYSICS.tuktuk;
+    const g = 9.8;
+    const rhoWater = 1000;
+    const maxMass = specs.mass;
+    
+    // Friction coefficient (drops during rain or mud)
+    let mu = 0.65;
+    if (rainIntensity > 0) {
+      mu = rainIntensity > 40 ? 0.22 : 0.38;
+    }
+    if (vehicleType === 'car') mu += 0.1;
+    
+    // Submerged volume ratio
+    const ratio = Math.min(1, maxDepth / specs.limitDepth);
+    const vSub = specs.maxVol * ratio;
+    
+    // Buoyancy force (Fb = rho * g * V_submerged)
+    const fb = Math.round(rhoWater * g * vSub);
+    
+    // Normal force (N = m*g - F_b)
+    const totalWeight = maxMass * g;
+    const normalForce = Math.max(0, totalWeight - fb);
+    
+    // Grip remaining percentage (%)
+    const gripRemaining = Math.round((normalForce / totalWeight) * 100);
+    
+    // Curve speed limit (R = 15m radius assumptions)
+    const R = 15;
+    const vLimitMps = Math.sqrt(mu * g * R * (normalForce / totalWeight));
+    const vLimitKmh = Math.round(vLimitMps * 3.6);
+    
+    // Hydrodynamic Drag force (assuming river velocity v_water = 1.2 m/s)
+    const vWater = 1.2;
+    const fd = Math.round(0.5 * specs.cd * rhoWater * (specs.area * ratio) * (vWater * vWater));
+
+    return { fb, normalForce: Math.round(normalForce), gripRemaining, vLimitKmh, fd };
+  };
+
 
 
   return (
@@ -1119,6 +1177,56 @@ export default function App() {
                   <span>{routeData.remarks?.map(r => translateRemark(r)).join(" ") || t('route_ok')}</span>
                 </div>
               </div>
+
+              {/* 실시간 물리 역학 시뮬레이션 데이터 분석 대시보드 */}
+              {(() => {
+                const maxDepth = routeData.geojson?.properties?.max_water_depth || 0;
+                const phys = calculatePhysics(routeData.vehicle, maxDepth);
+                return (
+                  <div style={{
+                    marginTop: '0.4rem',
+                    padding: '0.4rem 0.5rem',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    borderRadius: '8px',
+                    fontSize: '0.72rem'
+                  }}>
+                    <div style={{
+                      fontWeight: 'bold',
+                      color: 'rgba(96, 165, 250, 0.95)',
+                      marginBottom: '0.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                      paddingBottom: '0.2rem'
+                    }}>
+                      <Info size={12} />
+                      <span>{t('physics_title')}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                        <span>{t('physics_grip')} (Grip)</span>
+                        <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : phys.gripRemaining > 40 ? '#eab308' : '#ef4444' }}>
+                          {phys.gripRemaining} %
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                        <span>{t('physics_buoyancy')} (Buoyancy)</span>
+                        <span style={{ color: '#60a5fa' }}>{phys.fb} N</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                        <span>{t('physics_vlimit')} (Limit Speed)</span>
+                        <span style={{ color: '#fca5a5', fontWeight: 'bold' }}>{phys.vLimitKmh} km/h</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                        <span>{t('physics_drag')} (Fluid Drag)</span>
+                        <span style={{ color: '#f472b6' }}>{phys.fd} N</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </>
           ) : (
             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
