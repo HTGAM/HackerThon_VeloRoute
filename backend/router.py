@@ -80,9 +80,9 @@ class VientianeRouter:
         # Fields: source, target, base_distance, surface (paved/unpaved), telemetry_segment_id, type
         self.edges = [
             # Mekong Riverfront road (Quai Fa Ngum) - high flood risk
-            {"u": "A", "v": "B", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"},
-            {"u": "B", "v": "C", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"},
-            {"u": "C", "v": "D", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "primary"},
+            {"u": "A", "v": "B", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary", "geometry": [[102.6075, 17.9628], [102.6090, 17.9620], [102.6105, 17.9612]]},
+            {"u": "B", "v": "C", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary", "geometry": [[102.6105, 17.9612], [102.6120, 17.9605], [102.6133, 17.9599]]},
+            {"u": "C", "v": "D", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_East", "type": "primary", "geometry": [[102.6133, 17.9599], [102.6142, 17.9594], [102.6150, 17.9590]]},
             {"u": "M", "v": "A", "surface": "paved", "telemetry_id": "Quai_Fa_Ngum_West", "type": "primary"},
             
             # Setthathilath Road - mid-level inland
@@ -92,14 +92,14 @@ class VientianeRouter:
             {"u": "O", "v": "J", "surface": "paved", "telemetry_id": "Setthathilath_Rd", "type": "secondary"},
             
             # Samsenthai Road - high inland arterial (very safe)
-            {"u": "E", "v": "F", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "congested"},
-            {"u": "F", "v": "G", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
-            {"u": "G", "v": "H", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
+            {"u": "E", "v": "F", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "congested", "geometry": [[102.6079, 17.9662], [102.6095, 17.9658], [102.6111, 17.9654]]},
+            {"u": "F", "v": "G", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary", "geometry": [[102.6111, 17.9654], [102.6124, 17.9648], [102.6136, 17.9642]]},
+            {"u": "G", "v": "H", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary", "geometry": [[102.6136, 17.9642], [102.6146, 17.9637], [102.6156, 17.9632]]},
             {"u": "N", "v": "E", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "secondary"},
             
             # Lane Xang Avenue - primary high-ground artery towards Patuxai & Morning Market
             {"u": "D", "v": "H", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
-            {"u": "H", "v": "I", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
+            {"u": "H", "v": "I", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary", "geometry": [[102.6156, 17.9632], [102.6171, 17.9668], [102.6186, 17.9705]]},
             {"u": "H", "v": "P", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
             {"u": "D", "v": "P", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "secondary"},
             
@@ -113,8 +113,8 @@ class VientianeRouter:
             {"u": "O", "v": "N", "surface": "paved", "telemetry_id": "Chao_Anou_North", "type": "residential"},
             
             # Unpaved shortcut (demonstrating Tuk-Tuk unpaved avoidance)
-            {"u": "E", "v": "L", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
-            {"u": "L", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
+            {"u": "E", "v": "L", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "alley", "geometry": [[102.6079, 17.9662], [102.6087, 17.9660], [102.6095, 17.9658]]},
+            {"u": "L", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley", "geometry": [[102.6095, 17.9658], [102.6110, 17.9657], [102.6111, 17.9654]]},
             
             # Expanded Eastward & Airport Road Connections
             {"u": "N", "v": "S", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "primary"},
@@ -125,7 +125,7 @@ class VientianeRouter:
             
             # Expanded Alleys (Night Market shortcut)
             {"u": "N", "v": "T", "surface": "paved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
-            {"u": "T", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley"},
+            {"u": "T", "v": "F", "surface": "unpaved", "telemetry_id": "Samsenthai_Rd", "type": "alley", "geometry": [[102.6090, 17.9668], [102.6105, 17.9667], [102.6111, 17.9654]]},
 
             # Metropolitan Core Arteries (U - AE Connections)
             {"u": "I", "v": "X", "surface": "paved", "telemetry_id": "Lane_Xang_Ave", "type": "primary"},
@@ -282,8 +282,36 @@ class VientianeRouter:
             
             if curr == end:
                 # Found shortest path!
-                # Generate GeoJSON line feature
-                coordinates = [[self.nodes[node]["lng"], self.nodes[node]["lat"]] for node in path]
+                # Generate GeoJSON line feature with detailed geometries to follow real streets
+                coordinates = []
+                for i in range(len(path) - 1):
+                    u_node, v_node = path[i], path[i+1]
+                    
+                    found_geom = None
+                    for edge in self.edges:
+                        if edge["u"] == u_node and edge["v"] == v_node:
+                            found_geom = edge.get("geometry", None)
+                            break
+                        elif edge["u"] == v_node and edge["v"] == u_node:
+                            geom = edge.get("geometry", None)
+                            if geom:
+                                found_geom = geom[::-1] # Reverse coordinates for backward traversal
+                            break
+                            
+                    if found_geom:
+                        if coordinates:
+                            coordinates.extend(found_geom[1:])
+                        else:
+                            coordinates.extend(found_geom)
+                    else:
+                        # Fallback to straight line if no custom geometry exists
+                        pt1 = [self.nodes[u_node]["lng"], self.nodes[u_node]["lat"]]
+                        pt2 = [self.nodes[v_node]["lng"], self.nodes[v_node]["lat"]]
+                        if coordinates:
+                            coordinates.append(pt2)
+                        else:
+                            coordinates.extend([pt1, pt2])
+
                 
                 # Retrieve statistics
                 total_dist = 0.0
