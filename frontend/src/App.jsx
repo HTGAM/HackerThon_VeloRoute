@@ -1783,38 +1783,92 @@ export default function App() {
                   </div>
                 )}
                 {/* [인성적 설득: Ethos] 시스템의 신뢰도 및 공신력 표출 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#60a5fa', background: 'rgba(59, 130, 246, 0.08)', padding: '0.35rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)', marginBottom: '0.3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: '#60a5fa', background: 'rgba(59, 130, 246, 0.08)', padding: '0.4rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)', marginBottom: '0.2rem' }}>
                   <Shield size={12} />
                   <span>{t('cert_label')}</span>
                 </div>
 
-                <div className="widget-stat">
-                  <span className="widget-label">{t('distance')}</span>
-                  <span className="widget-value">{routeData.distance_m} m</span>
+                {/* 거리와 이동수단 카드 (가로 2열 배치) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '0.5rem', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginBottom: '0.15rem' }}>{t('distance')}</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f8fafc' }}>{routeData.distance_m} m</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '0.5rem', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginBottom: '0.15rem' }}>{t('selected_vehicle')}</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
+                      {routeData.vehicle === 'tuktuk' ? '🛺' : (routeData.vehicle === 'motorcycle' ? '🏍️' : '🚗')}
+                      <span>{getVehicleKorean(routeData.vehicle)}</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* [이성적 설득: Logos] 과학적이고 귀납적인 안전 수치 제시 */}
-                <div className="widget-stat" style={{ color: 'var(--status-safe)' }}>
-                  <span className="widget-label" style={{ color: 'rgba(16, 185, 129, 0.85)', fontWeight: '600' }}>{t('safety_index')}</span>
-                  <span className="widget-value" style={{ fontWeight: '700' }}>
-                    {routeData.geojson?.properties?.max_water_depth === 0 ? t('logos_safe_value') : t('logos_caution_value')}
+                {/* [이성적 설득: Logos] 경로 안전성 지수 프로그레스바 */}
+                {(() => {
+                  const maxDepth = routeData.geojson?.properties?.max_water_depth || 0;
+                  const limits = { tuktuk: 0.15, motorcycle: 0.22, car: 0.40 };
+                  const limit = limits[routeData.vehicle] || 0.40;
+                  
+                  let safetyPct = 99.8;
+                  let safetyColor = '#10b981'; // Green
+                  let safetyLabel = t('logos_safe_value');
+                  
+                  if (maxDepth >= limit) {
+                    safetyPct = 0;
+                    safetyColor = '#ef4444'; // Red
+                    safetyLabel = lang === 'ko' ? '0% (침수 차단)' : '0% (ຜ່ານບໍ່ໄດ້)';
+                  } else if (maxDepth > 0) {
+                    safetyPct = 82.4;
+                    safetyColor = '#f59e0b'; // Amber
+                    safetyLabel = t('logos_caution_value');
+                  }
+                  
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'rgba(255,255,255,0.02)', padding: '0.5rem 0.6rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
+                        <span style={{ color: '#94a3b8', fontWeight: '600' }}>{t('safety_index')}</span>
+                        <span style={{ fontWeight: 'bold', color: safetyColor }}>{safetyLabel}</span>
+                      </div>
+                      <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                        <div style={{ width: `${safetyPct}%`, height: '100%', background: safetyColor, transition: 'width 0.3s' }} />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 최대 침수 조우 깊이 실시간 게이지 */}
+                {(() => {
+                  const maxDepth = routeData.geojson?.properties?.max_water_depth || 0;
+                  const limits = { tuktuk: 0.15, motorcycle: 0.22, car: 0.40 };
+                  const limit = limits[routeData.vehicle] || 0.40;
+                  const ratio = Math.min(100, (maxDepth / limit) * 100);
+                  
+                  let barColor = '#10b981'; 
+                  if (maxDepth >= limit) {
+                    barColor = '#ef4444'; 
+                  } else if (maxDepth > 0) {
+                    barColor = '#f59e0b'; 
+                  }
+                  
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'rgba(255,255,255,0.02)', padding: '0.5rem 0.6rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
+                        <span style={{ color: '#94a3b8' }}>{t('max_water')}</span>
+                        <span style={{ fontWeight: 'bold', color: barColor }}>{maxDepth.toFixed(3)} m / {limit} m</span>
+                      </div>
+                      <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                        <div style={{ width: `${ratio}%`, height: '100%', background: barColor, transition: 'width 0.3s' }} />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 대피 코멘트 알림창 */}
+                <div className="widget-remarks" style={{ display: 'flex', gap: '0.4rem', alignItems: 'flex-start', padding: '0.5rem 0.6rem', borderRadius: '8px' }}>
+                  <Info size={14} style={{ flexShrink: 0, marginTop: '2px', color: '#60a5fa' }} />
+                  <span style={{ fontSize: '0.72rem', lineHeight: 1.35, color: '#93c5fd' }}>
+                    {routeData.remarks?.map(r => translateRemark(r)).join(" ") || t('route_ok')}
                   </span>
-                </div>
-                <div className="widget-stat">
-                  <span className="widget-label">{t('max_water')}</span>
-                  <span className="widget-value">{routeData.geojson?.properties?.max_water_depth?.toFixed(3) || 0.000} m</span>
-                </div>
-                <div className="widget-stat">
-                  <span className="widget-label">{t('selected_vehicle')}</span>
-                  <span className="widget-value">
-                    {getVehicleKorean(routeData.vehicle)}
-                  </span>
-                </div>
-                <div className="widget-remarks">
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                    <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{routeData.remarks?.map(r => translateRemark(r)).join(" ") || t('route_ok')}</span>
-                  </div>
                 </div>
 
                 {/* 실시간 물리 역학 시뮬레이션 데이터 분석 대시보드 */}
@@ -1823,45 +1877,50 @@ export default function App() {
                   const phys = calculatePhysics(routeData.vehicle, maxDepth);
                   return (
                     <div style={{
-                      marginTop: '0.4rem',
-                      padding: '0.4rem 0.5rem',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      borderRadius: '8px',
-                      fontSize: '0.72rem'
+                      padding: '0.6rem',
+                      background: 'rgba(99, 102, 241, 0.03)',
+                      border: '1px solid rgba(99, 102, 241, 0.15)',
+                      borderRadius: '12px',
+                      fontSize: '0.7rem'
                     }}>
                       <div style={{
                         fontWeight: 'bold',
-                        color: 'rgba(96, 165, 250, 0.95)',
-                        marginBottom: '0.25rem',
+                        color: '#818cf8',
+                        marginBottom: '0.4rem',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.25rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-                        paddingBottom: '0.2rem'
+                        borderBottom: '1px solid rgba(99, 102, 241, 0.15)',
+                        paddingBottom: '0.25rem'
                       }}>
-                        <Info size={12} />
+                        <Activity size={12} />
                         <span>{t('physics_title')}</span>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                          <span>{t('physics_grip')} (Grip)</span>
-                          <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : phys.gripRemaining > 40 ? '#eab308' : '#ef4444' }}>
-                            {phys.gripRemaining} %
-                          </span>
+                      
+                      {/* 물리 지표 2x2 Grid 배치 */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                          <div style={{ color: '#94a3b8', fontSize: '0.62rem', marginBottom: '0.1rem' }}>{t('physics_buoyancy')}</div>
+                          <div style={{ fontWeight: 'bold', color: '#60a5fa', fontSize: '0.78rem' }}>{phys.fb} N</div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                          <span>{t('physics_buoyancy')} (Buoyancy)</span>
-                          <span style={{ color: '#60a5fa' }}>{phys.fb} N</span>
+                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                          <div style={{ color: '#94a3b8', fontSize: '0.62rem', marginBottom: '0.1rem' }}>{t('physics_drag')}</div>
+                          <div style={{ fontWeight: 'bold', color: '#f472b6', fontSize: '0.78rem' }}>{phys.fd} N</div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                          <span>{t('physics_vlimit')} (Limit Speed)</span>
-                          <span style={{ color: '#fca5a5', fontWeight: 'bold' }}>{phys.vLimitKmh} km/h</span>
+                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.5rem', borderRadius: '6px', gridColumn: 'span 2', border: '1px solid rgba(255,255,255,0.02)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.62rem', marginBottom: '0.15rem' }}>
+                            <span>{t('physics_grip')}</span>
+                            <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444') }}>{phys.gripRemaining}%</span>
+                          </div>
+                          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                            <div style={{ width: `${phys.gripRemaining}%`, height: '100%', background: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444'), transition: 'width 0.3s' }} />
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                          <span>{t('physics_drag')} (Fluid Drag)</span>
-                          <span style={{ color: '#f472b6' }}>{phys.fd} N</span>
-                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                        <span>{t('physics_vlimit')}</span>
+                        <span style={{ color: '#fca5a5', fontWeight: 'bold', fontSize: '0.78rem' }}>{phys.vLimitKmh} km/h</span>
                       </div>
                     </div>
                   );
