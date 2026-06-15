@@ -22,9 +22,7 @@ import {
   AlertCircle,
   Trash2,
   CheckCircle,
-  Clock,
-  Volume2,
-  VolumeX
+  Clock
 } from 'lucide-react';
 
 // API Configuration
@@ -201,9 +199,7 @@ const TRANSLATIONS = {
     oracle_safe: "정상 상태: 현재 메콩강 수위가 도로 경계 이하에 머물러 있으며, 도로 표면의 정지 마찰 계수(μ ≈ 0.65)가 안정적으로 확보되어 차량 제어력이 우수합니다. 관성의 법칙에 따라 급제동 시에도 미끄러짐이 적으나, 빗길 안전거리는 항상 유지하십시오.",
     oracle_caution: "주의 상태: 폭우로 인해 노면이 젖으며 마찰 계수가 급격히 저하되고 있습니다. 특히 비포장 지름길은 점성 진흙이 되어 타이어의 구름 저항을 높이고 정지 마찰력을 파괴하여 차량 전복 확률을 급증시킵니다. 물리 법칙에 따라 마찰력의 한계를 존중하며 서행해야 합니다.",
     oracle_warning: "경고 상태: 침수가 시작되며 차량이 아르키메데스의 부력(Fb = ρgV)을 받기 시작합니다. 물에 잠긴 부피에 비례하여 부력이 커짐에 따라, 지면이 받쳐주는 수직항력(N = mg - Fb)이 급감합니다. 마찰력 공식 f = μN에 따라 접지 마찰력이 거의 소실되어 뚝뚝이나 오토바이는 쉽게 빗길에 미끄러져 유실될 수 있습니다.",
-    oracle_critical: "위험 상태: 메콩강 횡류에 의한 유체 저항력(항력 Fd = 1/2 Cd ρ A v²)이 타이어의 극소화된 최대 마찰 한계를 초과했습니다! 수직항력이 0에 수렴하여 바퀴가 공중에 뜬 수중 부유 상태가 되었으며, 이 상황에서는 아주 작은 물살의 힘으로도 차량이 강으로 쓸려 내려가는 물리적 파국을 피할 수 없습니다. 즉시 대피하십시오.",
-    audio_mute: "음성 경보 끄기",
-    audio_unmute: "음성 경보 켜기"
+    oracle_critical: "위험 상태: 메콩강 횡류에 의한 유체 저항력(항력 Fd = 1/2 Cd ρ A v²)이 타이어의 극소화된 최대 마찰 한계를 초과했습니다! 수직항력이 0에 수렴하여 바퀴가 공중에 뜬 수중 부유 상태가 되었으며, 이 상황에서는 아주 작은 물살의 힘으로도 차량이 강으로 쓸려 내려가는 물리적 파국을 피할 수 없습니다. 즉시 대피하십시오."
   },
   lo: {
     brand_title: "ເວໂລຣູດ ວຽງຈັນ",
@@ -313,7 +309,6 @@ export default function App() {
   // Environmental simulation states
   const [rainIntensity, setRainIntensity] = useState(0); // mm/h
   const [riverLevel, setRiverLevel] = useState(9.5); // meters above baseline
-  const [speakMuted, setSpeakMuted] = useState(false);
   
   // Routing settings
   const [startNode, setStartNode] = useState('A');
@@ -351,22 +346,6 @@ export default function App() {
       .then(data => setNodes(data))
       .catch(err => console.error("Error loading nodes:", err));
   }, []);
-
-  // Helper to trigger speech synthesis (TTS)
-  const speakAlert = useCallback((text) => {
-    if (speakMuted || !window.speechSynthesis) return;
-    
-    // Cancel any active speak requests
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'ko' ? 'ko-KR' : 'lo-LA';
-    utterance.rate = 1.05;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
-  }, [speakMuted, lang]);
-
-
 
 
   // Helper to fetch active hazards
@@ -520,47 +499,6 @@ export default function App() {
   };
 
   const weatherAlert = getWeatherAlert();
-
-  // Weather level state tracking to prevent repeated voice alerts
-  const [prevAlertLevel, setPrevAlertLevel] = useState('NORMAL');
-
-  // Trigger voice alert when weather threat levels escalate
-  useEffect(() => {
-    if (weatherAlert.level !== prevAlertLevel) {
-      setPrevAlertLevel(weatherAlert.level);
-      
-      let speakText = "";
-      if (lang === 'ko') {
-        if (weatherAlert.level === 'CRITICAL') speakText = "기상 재난 긴급 대피 경보가 발생했습니다. 저지대가 침수되고 있으니 즉시 대피하여 주십시오.";
-        else if (weatherAlert.level === 'WARNING') speakText = "기상 경보 발령. 강변 도로 침수 진행으로 안전한 고지대 도로로 우회하십시오.";
-        else if (weatherAlert.level === 'CAUTION') speakText = "기상 주의보 발령. 노면 미끄러짐과 지름길 차단 위험에 감속 서행하십시오.";
-      } else {
-        if (weatherAlert.level === 'CRITICAL') speakText = "ແຈ້ງເຕືອນໄພພິບັດ. ລະດັບນ້ຳຖ້ວມສູງ, ກະລຸນາອົບພະຍົບທັນທີ.";
-        else if (weatherAlert.level === 'WARNING') speakText = "ແຈ້ງເຕືອນລະດັບນ້ຳຂອງຂຶ້ນສູງ. ກະລຸນາຫຼີກລ່ຽງທາງແຄມຂອງ.";
-        else if (weatherAlert.level === 'CAUTION') speakText = "ແຈ້ງເຕືອນລະວັງ. ທາງມື່ນ ແລະ ທາງດິນແດງເປັນຕົມ.";
-      }
-      
-      if (speakText) {
-        speakAlert(speakText);
-      }
-    }
-  }, [weatherAlert.level, prevAlertLevel, lang, speakAlert]);
-
-  // Trigger voice guidance when route is computed (specifically in Evacuation Mode)
-  useEffect(() => {
-    if (isEvacMode && routeData && routeData.shelter_name) {
-      const shelterLabel = getNodeLabel(routeData.shelter_name) || routeData.shelter_name;
-      const distKm = (routeData.distance_m / 1000).toFixed(1);
-      
-      let speakText = "";
-      if (lang === 'ko') {
-        speakText = `가장 가까운 안전대피소인 ${shelterLabel}까지 최단 대피 경로를 안내합니다. 총 거리 ${distKm} 킬로미터입니다. 서둘러 대피하여 주십시오.`;
-      } else {
-        speakText = `ຄຳນວນເສັ້ນທາງອົບພະຍົບໄປຫາ ສູນອົບພະຍົບ ${shelterLabel} ແລ້ວ. ໄລຍະທາງ ${distKm} ກິໂລແມັດ. ກະລຸນາອົບພະຍົບດ່ວນ.`;
-      }
-      speakAlert(speakText);
-    }
-  }, [routeData, isEvacMode, lang, speakAlert]);
 
   // Utility to determine color of route safety status
   const getRouteColor = () => {
@@ -902,27 +840,6 @@ export default function App() {
               <span>🇱🇦</span> LO
             </button>
           </div>
-
-          {/* Audio Alert Toggle */}
-          <button
-            onClick={() => setSpeakMuted(m => !m)}
-            style={{
-              background: speakMuted ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-              border: speakMuted ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(16, 185, 129, 0.35)',
-              color: speakMuted ? '#fca5a5' : '#a7f3d0',
-              borderRadius: '8px',
-              width: 30,
-              height: 30,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-            title={speakMuted ? t('audio_unmute') : t('audio_mute')}
-          >
-            {speakMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-          </button>
         </div>
         
         {/* Telemetry Telemetry Info */}
