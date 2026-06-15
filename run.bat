@@ -34,14 +34,6 @@ echo [3/3] Waiting for servers to initialize (5 seconds)...
 timeout /t 5 /nobreak > nul
 
 echo.
-echo =======================================================================
-echo   Opening Web Navigation Dashboards in your default browser...
-echo =======================================================================
-:: Open both ports 3000 and 3001 in case port 3000 is occupied.
-start http://localhost:3000
-start http://localhost:3001
-
-echo.
 echo Startup completed successfully! 
 echo Please keep the spawned command prompt windows open while using the application.
 echo.

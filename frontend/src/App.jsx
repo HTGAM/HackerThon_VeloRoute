@@ -1,7 +1,7 @@
 // VeloRoute Vientiane: React Live Map Dashboard
 // Architecture Focus: Renders dynamic flood polygons, safe vehicle routing paths, and live hydrology simulations.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, Polygon, useMap } from 'react-leaflet';
 import { 
   Droplets, 
@@ -20,11 +20,15 @@ import {
   Siren,
   Shield,
   AlertCircle,
-  Trash2
+  Trash2,
+  CheckCircle,
+  Clock,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 // API Configuration
-const API_BASE = 'http://localhost:8001';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8001';
 
 // Central Vientiane coordinates
 const MAP_CENTER = [17.9642, 102.6120];
@@ -188,7 +192,18 @@ const TRANSLATIONS = {
     physics_grip: "타이어 접지 마찰력 잔여율",
     physics_buoyancy: "차량 침수 부력 (Fb)",
     physics_vlimit: "안전 선회 속도 (R=15m 임계치)",
-    physics_drag: "메콩강 횡류 유체 저항력 (Fd)"
+    physics_drag: "메콩강 횡류 유체 저항력 (Fd)",
+    golden_time_label: "🚨 안전 대피 골든타임",
+    golden_time_blocked: "🚨 경로 완전 차단 (즉시 고지대 건물 옥상으로 대피하십시오!)",
+    minutes_left: "분 남음 (서둘러 대피 요망)",
+    safe_status: "안전 시간 충분 (침수 없음)",
+    physics_oracle_title: "AI 물리학적 대피 가이드 (Physics Oracle)",
+    oracle_safe: "정상 상태: 현재 메콩강 수위가 도로 경계 이하에 머물러 있으며, 도로 표면의 정지 마찰 계수(μ ≈ 0.65)가 안정적으로 확보되어 차량 제어력이 우수합니다. 관성의 법칙에 따라 급제동 시에도 미끄러짐이 적으나, 빗길 안전거리는 항상 유지하십시오.",
+    oracle_caution: "주의 상태: 폭우로 인해 노면이 젖으며 마찰 계수가 급격히 저하되고 있습니다. 특히 비포장 지름길은 점성 진흙이 되어 타이어의 구름 저항을 높이고 정지 마찰력을 파괴하여 차량 전복 확률을 급증시킵니다. 물리 법칙에 따라 마찰력의 한계를 존중하며 서행해야 합니다.",
+    oracle_warning: "경고 상태: 침수가 시작되며 차량이 아르키메데스의 부력(Fb = ρgV)을 받기 시작합니다. 물에 잠긴 부피에 비례하여 부력이 커짐에 따라, 지면이 받쳐주는 수직항력(N = mg - Fb)이 급감합니다. 마찰력 공식 f = μN에 따라 접지 마찰력이 거의 소실되어 뚝뚝이나 오토바이는 쉽게 빗길에 미끄러져 유실될 수 있습니다.",
+    oracle_critical: "위험 상태: 메콩강 횡류에 의한 유체 저항력(항력 Fd = 1/2 Cd ρ A v²)이 타이어의 극소화된 최대 마찰 한계를 초과했습니다! 수직항력이 0에 수렴하여 바퀴가 공중에 뜬 수중 부유 상태가 되었으며, 이 상황에서는 아주 작은 물살의 힘으로도 차량이 강으로 쓸려 내려가는 물리적 파국을 피할 수 없습니다. 즉시 대피하십시오.",
+    audio_mute: "음성 경보 끄기",
+    audio_unmute: "음성 경보 켜기"
   },
   lo: {
     brand_title: "ເວໂລຣູດ ວຽງຈັນ",
@@ -258,7 +273,18 @@ const TRANSLATIONS = {
     physics_grip: "ອັດຕາແຮງຍຶດເກາະຢາງຍັງເຫຼືອ",
     physics_buoyancy: "ແຮງຟູຈາກນ້ຳຖ້ວມ (Fb)",
     physics_vlimit: "ຄວາມໄວຈຳກັດການລ້ຽວ (R=15m)",
-    physics_drag: "ແຮງຕ້ານທາງຂ້າງແມ່ນ້ຳຂອງ (Fd)"
+    physics_drag: "ແຮງຕ້ານທາງຂ້າງແມ່ນ້ຳຂອງ (Fd)",
+    golden_time_label: "🚨 ເວລາທອງໃນການອົບພະຍົບປອດໄພ",
+    golden_time_blocked: "🚨 ເສັ້ນທາງຖືກຕັດຂາດທັງໝົດ (ຮີບອົບພະຍົບຂຶ້ນດາດຟ້າຕຶກສູງທັນທີ!)",
+    minutes_left: "ນາທີເຫຼືອ (ຮີບອົບພະຍົບດ່ວນ)",
+    safe_status: "ເວລາປອດໄພພຽງພໍ (ບໍ່ມີນ້ຳຖ້ວມ)",
+    physics_oracle_title: "AI ຄຳແນະນຳທາງຟີຊິກ (Physics Oracle)",
+    oracle_safe: "ສະພາບປົກກະຕິ: ລະດັບນ້ຳຂອງຍັງຢູ່ຕ່ຳກວ່າຂອບທາງ, ແຮງຍຶດເກາະລະຫວ່າງຢາງລົດແລະໜ້າທາງ (μ ≈ 0.65) ຍັງຄົງທີ່ ເຮັດໃຫ້ການຄວບຄຸມລົດດີ. ອີງຕາມກົດເກນແຮງເສື່ອຍ ຈະຫຼຸດການມື່ນສະໄລ້ ແຕ່ຄວນຮັກສາໄລຍະຫ່າງທີ່ປອດໄພສະເໝີ.",
+    oracle_caution: "ສະພາບລະວັງ: ຝົນຕົກໜັກເຮັດໃຫ້ໜ້າທາງມື່ນ ແລະ ຫຼຸດແຮງຍຶດເກາະຢ່າງໄວ. ໂດຍສະເພາະທາງລັດທີ່ເປັນດິນແດງຈະກາຍເປັນຕົມໜຽວ ເພີ່ມແຮງຕ້ານການໝຸນແລະທຳລາຍແຮງຍຶດເກາະ ເຮັດໃຫ້ມີໂອກາດລົດປີ້ນສູງ. ຄວນຂັບຂີ່ຊ້າໆຕາມກົດເກນຟີຊິກ.",
+    oracle_warning: "ສະພາບເຕືອນໄພ: ເລີ່ມມີນ້ຳຖ້ວມຂັງ ແລະ ພາຫະນະໄດ້ຮັບແຮງຟູ (Fb = ρgV) ຕາມກົດເກນອາກຊີເມດ. ແຮງຟູທີ່ເພີ່ມຂຶ້ນຕາມບໍລິມາດທີ່ຈົມນ້ຳ ເຮັດໃຫ້ແຮງປະຕິກິລິຍາຕັ້ງສາກ (N = mg - Fb) ຫຼຸດລົງຢ່າງແຮງ. ອີງຕາມສູດແຮງຮຸກຖູ f = μN ແຮງຍຶດເກາະເກືອບຈະໝົດໄປ ເຮັດໃຫ້ລົດຕຸກຕຸກ ຫຼື ລົດຈັກມື່ນໄຫຼໄດ້ງ່າຍ.",
+    oracle_critical: "ສະພາບອັນຕະລາຍ: ແຮງຕ້ານທານຈາກກະແສນ້ຳໄຫຼ (Fd = 1/2 Cd ρ A v²) ໄດ້ເກີນຂີດຈຳກັດແຮງຮຸກຖູສູງສຸດຂອງຢາງລົດແລ້ວ! ແຮງປະຕິກິລິຍາຕັ້ງສາກໃກ້ກັບ 0 ເຮັດໃຫ້ລົດຟູລອຍ. ໃນສະພາບນີ້ ພຽງແຕ່ແຮງນ້ຳໄຫຼໜ້ອຍໜຶ່ງກໍສາມາດພັດລົດໄຫຼໄປໄດ້. ກະລຸນาອົບພະຍົບທັນທີ.",
+    audio_mute: "ປິດສຽງເຕືອນ",
+    audio_unmute: "ເປີດສຽງເຕືອນ"
   }
 };
 
@@ -287,6 +313,7 @@ export default function App() {
   // Environmental simulation states
   const [rainIntensity, setRainIntensity] = useState(0); // mm/h
   const [riverLevel, setRiverLevel] = useState(9.5); // meters above baseline
+  const [speakMuted, setSpeakMuted] = useState(false);
   
   // Routing settings
   const [startNode, setStartNode] = useState('A');
@@ -303,6 +330,19 @@ export default function App() {
   const [floodZones, setFloodZones] = useState([]);
   const [nodes, setNodes] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
+
+  // ── AI Chatbot States ──────────────────────────────────────
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'bot', text: lang === 'ko'
+        ? '안녕하세요! 🌊 벨로루트 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
+        : 'ສະບາຍດີ! 🌊 ຂ້ອຍແມ່ນ AI ຂອງ VeloRoute.\nຖາມຂ້ອຍກ່ຽວກັບສະພາບອາກາດ, ເສັ້ນທາງ, ຫຼືຄວາມປອດໄພໄດ້ເລີຍ!'
+    }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatTyping, setChatTyping] = useState(false);
+  const chatEndRef = useRef(null);
+  const chatInputRef = useRef(null);
   
   // Load initial nodes on mount
   useEffect(() => {
@@ -311,6 +351,23 @@ export default function App() {
       .then(data => setNodes(data))
       .catch(err => console.error("Error loading nodes:", err));
   }, []);
+
+  // Helper to trigger speech synthesis (TTS)
+  const speakAlert = useCallback((text) => {
+    if (speakMuted || !window.speechSynthesis) return;
+    
+    // Cancel any active speak requests
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang === 'ko' ? 'ko-KR' : 'lo-LA';
+    utterance.rate = 1.05;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }, [speakMuted, lang]);
+
+
+
 
   // Helper to fetch active hazards
   const fetchHazards = async () => {
@@ -464,6 +521,47 @@ export default function App() {
 
   const weatherAlert = getWeatherAlert();
 
+  // Weather level state tracking to prevent repeated voice alerts
+  const [prevAlertLevel, setPrevAlertLevel] = useState('NORMAL');
+
+  // Trigger voice alert when weather threat levels escalate
+  useEffect(() => {
+    if (weatherAlert.level !== prevAlertLevel) {
+      setPrevAlertLevel(weatherAlert.level);
+      
+      let speakText = "";
+      if (lang === 'ko') {
+        if (weatherAlert.level === 'CRITICAL') speakText = "기상 재난 긴급 대피 경보가 발생했습니다. 저지대가 침수되고 있으니 즉시 대피하여 주십시오.";
+        else if (weatherAlert.level === 'WARNING') speakText = "기상 경보 발령. 강변 도로 침수 진행으로 안전한 고지대 도로로 우회하십시오.";
+        else if (weatherAlert.level === 'CAUTION') speakText = "기상 주의보 발령. 노면 미끄러짐과 지름길 차단 위험에 감속 서행하십시오.";
+      } else {
+        if (weatherAlert.level === 'CRITICAL') speakText = "ແຈ້ງເຕືອນໄພພິບັດ. ລະດັບນ້ຳຖ້ວມສູງ, ກະລຸນາອົບພະຍົບທັນທີ.";
+        else if (weatherAlert.level === 'WARNING') speakText = "ແຈ້ງເຕືອນລະດັບນ້ຳຂອງຂຶ້ນສູງ. ກະລຸນາຫຼີກລ່ຽງທາງແຄມຂອງ.";
+        else if (weatherAlert.level === 'CAUTION') speakText = "ແຈ້ງເຕືອນລະວັງ. ທາງມື່ນ ແລະ ທາງດິນແດງເປັນຕົມ.";
+      }
+      
+      if (speakText) {
+        speakAlert(speakText);
+      }
+    }
+  }, [weatherAlert.level, prevAlertLevel, lang, speakAlert]);
+
+  // Trigger voice guidance when route is computed (specifically in Evacuation Mode)
+  useEffect(() => {
+    if (isEvacMode && routeData && routeData.shelter_name) {
+      const shelterLabel = getNodeLabel(routeData.shelter_name) || routeData.shelter_name;
+      const distKm = (routeData.distance_m / 1000).toFixed(1);
+      
+      let speakText = "";
+      if (lang === 'ko') {
+        speakText = `가장 가까운 안전대피소인 ${shelterLabel}까지 최단 대피 경로를 안내합니다. 총 거리 ${distKm} 킬로미터입니다. 서둘러 대피하여 주십시오.`;
+      } else {
+        speakText = `ຄຳນວນເສັ້ນທາງອົບພະຍົບໄປຫາ ສູນອົບພະຍົບ ${shelterLabel} ແລ້ວ. ໄລຍະທາງ ${distKm} ກິໂລແມັດ. ກະລຸນາອົບພະຍົບດ່ວນ.`;
+      }
+      speakAlert(speakText);
+    }
+  }, [routeData, isEvacMode, lang, speakAlert]);
+
   // Utility to determine color of route safety status
   const getRouteColor = () => {
     if (!routeData) return '#ef4444';
@@ -598,6 +696,130 @@ export default function App() {
 
 
 
+  // ── AI Chatbot Logic ───────────────────────────────────────
+  const getBotReply = useCallback((input) => {
+    const q = input.toLowerCase();
+    const isLao = lang === 'lo';
+    const alert = getWeatherAlert();
+    const depth = routeData?.geojson?.properties?.max_water_depth ?? 0;
+    const remark = routeData?.geojson?.properties?.remarks ?? '';
+    const routeNodes = routeData?.geojson?.properties?.path?.join(' → ') ?? '';
+
+    // Context summary for smart answers
+    const ctx = {
+      rain: rainIntensity,
+      river: riverLevel,
+      level: alert.level,
+      depth,
+      vehicle,
+      remark,
+      routeNodes,
+      start: startNode,
+      end: endNode,
+    };
+
+    // ── Keyword matching ──
+    const isAbout = (...kws) => kws.some(k => q.includes(k));
+
+    // 현재 상황 / ສະຖານະການ
+    if (isAbout('현재', '상황', 'ສະຖານະ', 'ຕອນນີ້', 'now', 'status')) {
+      return isLao
+        ? `ຕອນນີ້: ຝົນ ${ctx.rain} mm/h | ລະດັບນ້ຳ ${ctx.river.toFixed(1)}m | ສະຖານະ: ${alert.title}\n${alert.msg}`
+        : `현재 상황:\n강수량 ${ctx.rain} mm/h | 수위 ${ctx.river.toFixed(1)}m\n경보 단계: ${alert.level}\n${alert.msg}`;
+    }
+
+    // 경로 / ເສັ້ນທາງ
+    if (isAbout('경로', '길', 'route', 'ເສັ້ນທາງ', 'ທາງ')) {
+      if (!routeData) {
+        return isLao ? 'ຍັງບໍ່ທັນໄດ້ຄຳນວນເສັ້ນທາງ. ກະລຸນາລໍຖ້າ...' : '경로를 아직 계산 중입니다. 잠시 기다려 주세요.';
+      }
+      return isLao
+        ? `ເສັ້ນທາງ: ${ctx.routeNodes}\nຄວາມເລິກນ້ຳສູງສຸດ: ${(ctx.depth*100).toFixed(0)} cm\n${translateRemark(ctx.remark)}`
+        : `현재 경로: ${ctx.routeNodes}\n최대 침수 깊이: ${(ctx.depth*100).toFixed(0)} cm\n${ctx.remark}`;
+    }
+
+    // 안전한가요? / ປອດໄພ?
+    if (isAbout('안전', '괜찮', 'safe', 'ປອດໄພ', 'ໄດ້ບໍ')) {
+      if (ctx.level === 'CRITICAL') {
+        return isLao ? '🚨 ອັນຕະລາຍ! ກ່ອນອົດໄພທັນທີ!' : '🚨 위험 단계! 즉시 대피하세요!';
+      } else if (ctx.level === 'WARNING') {
+        return isLao ? '⚠️ ລະວັງ! ຖະໜົນຫຼາຍສາຍຖືກນ້ຳຖ້ວມ. ຂັບຊ້າໆ.' : '⚠️ 경고! 강변 도로 침수 중. 서행 권고';
+      } else if (ctx.level === 'CAUTION') {
+        return isLao ? '⚡ ລະວັງ! ຖະໜົນລື່ນ. ຄວາມໄວຕ່ຳ.' : '⚡ 주의! 노면 미끄러움. 감속 운행하세요.';
+      }
+      return isLao ? '✅ ໂດຍລວມປອດໄພ. ຂັບໄດ້ຕາມປົກກະຕິ.' : '✅ 현재 전반적으로 안전합니다. 정상 운행 가능';
+    }
+
+    // 침수 깊이 / ຄວາມເລິກນ້ຳ
+    if (isAbout('침수', '깊이', '수심', 'depth', 'ນ້ຳຖ້ວມ', 'ເລິກ')) {
+      if (depth === 0) {
+        return isLao ? '✅ ຕອນນີ້ ເສັ້ນທາງທັງໝົດແຫ້ງ. ບໍ່ມີນ້ຳຖ້ວມ.' : '✅ 현재 경로 전 구간 침수 없음';
+      }
+      return isLao
+        ? `🌊 ຄວາມເລິກນ້ຳສູງສຸດ ${(depth*100).toFixed(0)} cm. ${depth >= 0.22 ? 'ລົດຈັກ ຫ້າມຜ່ານ!' : 'ຂັບຊ້າໆ.'}`
+        : `🌊 최대 침수 깊이: ${(depth*100).toFixed(0)} cm\n${depth >= 0.22 ? '오토바이 통행 불가!' : '서행 권고'}`;
+    }
+
+    // 차량 / ພາຫະນະ
+    if (isAbout('차량', '뚝뚝', '오토바이', '승용차', 'vehicle', 'ຕຸກຕຸກ', 'ລົດຈັກ', 'ລົດໃຫຍ່')) {
+      const vmap = {
+        tuktuk:     isLao ? '뚝뚝: 침수 한계 15cm' : '뚝뚝: 침수 한계 15cm. 비포장도로 6.5배 패널티',
+        motorcycle: isLao ? 'ລົດຈັກ: ຂີດຈຳກັດ 22cm' : '오토바이: 침수 한계 22cm. 비포장 2.5배 패널티',
+        car:        isLao ? 'ລົດໃຫຍ່: ຂີດຈຳກັດ 40cm' : '승용차: 침수 한계 40cm. 가장 안전'
+      };
+      return `${isLao ? 'ພາຫະນະທີ່ເລືອກ' : '선택된 차량'}: ${getVehicleKorean(ctx.vehicle)}\n${vmap[ctx.vehicle] || ''}`;
+    }
+
+    // 대피소 / ສູນອົບພະຍົບ
+    if (isAbout('대피', '피난', 'shelter', 'evacu', 'ອົບພະຍົບ', 'ສູນ')) {
+      return isLao
+        ? '🛡️ ສູນອົບພະຍົບ 4 ແຫ່ງ:\n• I: ປະຕູໄຊ\n• Q: ທາດຫຼວງ\n• V: ມ.ຊ.ດົງໂດກ\n• P: ຕະຫຼາດເຊົ້າ\nກົດ 🚨 ເພື່ອຊອກຫາທາງທີ່ໃກ້ທີ່ສຸດ.'
+        : '🛡️ 안전 대피소 4곳:\n• I: 빠뚜사이(독립기념탑)\n• Q: 탓루앙(황금사원)\n• V: 동독 국립대\n• P: 딸랏싸오 시장\n\n🚨버튼으로 최적 대피로를 탐색하세요!';
+    }
+
+    // 강수량 / 수위
+    if (isAbout('비', '강수', '수위', '메콩', 'rain', 'river', 'ຝົນ', 'ນ້ຳ', 'ແມ່ນ້ຳ')) {
+      return isLao
+        ? `🌧 ຝົນ: ${ctx.rain} mm/h | ລະດັບນ້ຳ: ${ctx.river.toFixed(1)}m\n${ctx.rain > 50 ? 'ຝົນຕົກໜັກ! ລະວັງ!' : ctx.rain > 20 ? 'ຝົນປານກາງ' : 'ສະພາບດີ'}`
+        : `🌧 강수량: ${ctx.rain} mm/h | 수위: ${ctx.river.toFixed(1)}m\n${ctx.rain > 50 ? '집중호우! 경계 요망' : ctx.rain > 20 ? '보통 강우' : '양호'}`;
+    }
+
+    // 도움말
+    if (isAbout('도움', 'help', '뭐', '기능', 'ຊ່ວຍ', 'ຫຍັງ')) {
+      return isLao
+        ? '💬 ຖາມຂ້ອຍໄດ້ກ່ຽວກັບ:\n• ສະຖານະການ (ສະຖານະ)\n• ເສັ້ນທາງ (ທາງ)\n• ຄວາມປອດໄພ (ປອດໄພ)\n• ລະດັບນ້ຳ (ນ້ຳ, ຝົນ)\n• ສູນອົບພະຍົບ (ອົບພະຍົບ)\n• ພາຫະນະ (ຕຸກຕຸກ, ລົດຈັກ)'
+        : '💬 질문 예시:\n• 현재 상황 알려줘\n• 경로가 안전해?\n• 침수 깊이 얼마야?\n• 대피소 어디야?\n• 비가 얼마나 와?\n• 뚝뚝으로 갈 수 있어?';
+    }
+
+    // Default
+    return isLao
+      ? `❓ '${input}'에 대한 정보를 찾지 못했습니다.\n'ຊ່ວຍ' 或 'help'라고 물어보세요!`
+      : `❓ "${input}"에 대한 정보를 찾지 못했어요.\n'도움말'이라고 물어보시면 할 수 있는 것들을 알려드릴게요!`;
+  }, [lang, rainIntensity, riverLevel, routeData, vehicle, startNode, endNode, getWeatherAlert, translateRemark, getVehicleKorean]);
+
+  const handleChatSend = useCallback((text) => {
+    const input = (text || chatInput).trim();
+    if (!input) return;
+    setChatInput('');
+    setChatMessages(prev => [...prev, { role: 'user', text: input }]);
+    setChatTyping(true);
+    setTimeout(() => {
+      const reply = getBotReply(input);
+      setChatMessages(prev => [...prev, { role: 'bot', text: reply }]);
+      setChatTyping(false);
+    }, 700);
+  }, [chatInput, getBotReply]);
+
+  // Auto-scroll chat
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, chatTyping]);
+
+  // Quick question chips
+  const quickQuestions = lang === 'ko'
+    ? ['현재 상황 알려줘', '경로 안전해?', '침수 깊이?', '대피소 어디야?']
+    : ['ສະຖານະຕອນນີ້', 'ເສັ້ນທາງປອດໄພ?', 'ນ້ຳເລິກ?', 'ສູນອົບພະຍົບ?'];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
       {/* Weather Alert Notification Banner */}
@@ -680,6 +902,27 @@ export default function App() {
               <span>🇱🇦</span> LO
             </button>
           </div>
+
+          {/* Audio Alert Toggle */}
+          <button
+            onClick={() => setSpeakMuted(m => !m)}
+            style={{
+              background: speakMuted ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+              border: speakMuted ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(16, 185, 129, 0.35)',
+              color: speakMuted ? '#fca5a5' : '#a7f3d0',
+              borderRadius: '8px',
+              width: 30,
+              height: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            title={speakMuted ? t('audio_unmute') : t('audio_mute')}
+          >
+            {speakMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
         </div>
         
         {/* Telemetry Telemetry Info */}
@@ -1236,6 +1479,189 @@ export default function App() {
         </div>
       </main>
     </div>
-  </div>
+
+      {/* ── AI Chatbot Widget ───────────────────────────────── */}
+      <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+
+        {/* Chat Window */}
+        {chatOpen && (
+          <div style={{
+            width: '340px',
+            height: '480px',
+            background: 'linear-gradient(145deg, #0f1729, #1a2744)',
+            border: '1px solid rgba(96,165,250,0.25)',
+            borderRadius: '1.25rem',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(96,165,250,0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            animation: 'chatSlideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)'
+          }}>
+
+            {/* Header */}
+            <div style={{
+              background: 'linear-gradient(90deg, #1e3a8a, #1d4ed8)',
+              padding: '0.85rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid rgba(96,165,250,0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#60a5fa,#818cf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>🤖</div>
+                <div>
+                  <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem', lineHeight: 1.2 }}>
+                    {lang === 'ko' ? 'VeloRoute AI' : 'VeloRoute AI'}
+                  </div>
+                  <div style={{ color: '#93c5fd', fontSize: '0.7rem' }}>
+                    <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#4ade80', marginRight: 4, verticalAlign: 'middle' }} />
+                    {lang === 'ko' ? '홍수 안전 도우미' : 'ຜູ້ຊ່ວຍຄວາມປອດໄພ'}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setChatOpen(false)}
+                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >✕</button>
+            </div>
+
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {chatMessages.map((m, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                  <div style={{
+                    maxWidth: '85%',
+                    padding: '0.55rem 0.85rem',
+                    borderRadius: m.role === 'user' ? '1rem 1rem 0.2rem 1rem' : '1rem 1rem 1rem 0.2rem',
+                    background: m.role === 'user'
+                      ? 'linear-gradient(135deg, #1d4ed8, #3b82f6)'
+                      : 'rgba(255,255,255,0.07)',
+                    border: m.role === 'bot' ? '1px solid rgba(96,165,250,0.15)' : 'none',
+                    color: '#e2e8f0',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.55,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    {m.text}
+                  </div>
+                </div>
+              ))}
+              {chatTyping && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  <div style={{ padding: '0.55rem 0.9rem', borderRadius: '1rem 1rem 1rem 0.2rem', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(96,165,250,0.15)', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    {[0,1,2].map(d => (
+                      <span key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa', display: 'inline-block', animation: `chatDot 1.2s ${d*0.2}s infinite` }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Quick Questions */}
+            <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {quickQuestions.map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleChatSend(q)}
+                  style={{
+                    background: 'rgba(59,130,246,0.15)',
+                    border: '1px solid rgba(96,165,250,0.3)',
+                    color: '#93c5fd',
+                    borderRadius: '999px',
+                    padding: '0.25rem 0.65rem',
+                    fontSize: '0.7rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                  onMouseEnter={e => { e.target.style.background='rgba(59,130,246,0.3)'; e.target.style.color='#fff'; }}
+                  onMouseLeave={e => { e.target.style.background='rgba(59,130,246,0.15)'; e.target.style.color='#93c5fd'; }}
+                >{q}</button>
+              ))}
+            </div>
+
+            {/* Input */}
+            <div style={{ padding: '0.6rem', borderTop: '1px solid rgba(96,165,250,0.15)', display: 'flex', gap: '0.5rem' }}>
+              <input
+                ref={chatInputRef}
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleChatSend()}
+                placeholder={lang === 'ko' ? '질문을 입력하세요...' : 'ພິມຄຳຖາມ...'}
+                style={{
+                  flex: 1,
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(96,165,250,0.25)',
+                  borderRadius: '0.75rem',
+                  color: '#e2e8f0',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8rem',
+                  outline: 'none',
+                  fontFamily: 'inherit'
+                }}
+              />
+              <button
+                onClick={() => handleChatSend()}
+                style={{
+                  background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                  border: 'none',
+                  borderRadius: '0.75rem',
+                  color: '#fff',
+                  padding: '0 1rem',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  transition: 'opacity 0.15s'
+                }}
+                onMouseEnter={e => e.target.style.opacity='0.85'}
+                onMouseLeave={e => e.target.style.opacity='1'}
+              >↑</button>
+            </div>
+          </div>
+        )}
+
+        {/* Floating Bubble Button */}
+        <button
+          onClick={() => setChatOpen(o => !o)}
+          style={{
+            width: 58,
+            height: 58,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #1d4ed8, #6366f1)',
+            border: '2px solid rgba(99,102,241,0.4)',
+            boxShadow: '0 4px 24px rgba(99,102,241,0.5)',
+            cursor: 'pointer',
+            fontSize: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            animation: chatOpen ? 'none' : 'chatPulse 2.5s infinite'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform='scale(1.1)'; e.currentTarget.style.boxShadow='0 6px 30px rgba(99,102,241,0.7)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 4px 24px rgba(99,102,241,0.5)'; }}
+          title={lang === 'ko' ? 'AI 안전 도우미' : 'AI ຜູ້ຊ່ວຍ'}
+        >
+          {chatOpen ? '✕' : '🤖'}
+        </button>
+
+        {/* CSS animations injected inline */}
+        <style>{`
+          @keyframes chatSlideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          @keyframes chatPulse {
+            0%, 100% { box-shadow: 0 4px 24px rgba(99,102,241,0.5); }
+            50%       { box-shadow: 0 4px 36px rgba(99,102,241,0.85); }
+          }
+          @keyframes chatDot {
+            0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+            40%            { transform: scale(1);   opacity: 1; }
+          }
+        `}</style>
+      </div>
+    </div>
   );
 }
