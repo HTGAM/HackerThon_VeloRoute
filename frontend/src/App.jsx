@@ -121,6 +121,90 @@ const NODE_LABELS_BY_LANG = {
   }
 };
 
+const GAME_EDGES = [
+  { u: "A", v: "B", telemetry_id: "Quai_Fa_Ngum_West", surface: "paved" },
+  { u: "B", v: "C", telemetry_id: "Quai_Fa_Ngum_West", surface: "paved" },
+  { u: "C", v: "D", telemetry_id: "Quai_Fa_Ngum_East", surface: "paved" },
+  { u: "M", v: "A", telemetry_id: "Quai_Fa_Ngum_West", surface: "paved" },
+  { u: "A", v: "J", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "J", v: "K", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "K", v: "D", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "O", v: "J", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "E", v: "F", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "F", v: "G", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "G", v: "H", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "N", v: "E", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "D", v: "H", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "H", v: "I", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "H", v: "P", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "D", v: "P", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "A", v: "E", telemetry_id: "Chao_Anou_South", surface: "paved" },
+  { u: "B", v: "J", telemetry_id: "Chao_Anou_South", surface: "paved" },
+  { u: "J", v: "F", telemetry_id: "Chao_Anou_North", surface: "paved" },
+  { u: "C", v: "K", telemetry_id: "Pangkham_South", surface: "paved" },
+  { u: "K", v: "G", telemetry_id: "Pangkham_North", surface: "paved" },
+  { u: "M", v: "O", telemetry_id: "Chao_Anou_South", surface: "paved" },
+  { u: "O", v: "N", telemetry_id: "Chao_Anou_North", surface: "paved" },
+  { u: "E", v: "L", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "L", v: "F", telemetry_id: "Samsenthai_Rd", surface: "unpaved" },
+  { u: "N", v: "S", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "S", v: "U", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "I", v: "R", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "R", v: "Q", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "H", v: "R", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "N", v: "T", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "T", v: "F", telemetry_id: "Samsenthai_Rd", surface: "unpaved" },
+  { u: "I", v: "X", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "X", v: "W", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "W", v: "V", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "R", v: "X", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "Q", v: "W", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "Q", v: "Y", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "P", v: "AC", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "P", v: "Y", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AC", v: "AD", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "AD", v: "AA", telemetry_id: "Quai_Fa_Ngum_East", surface: "paved" },
+  { u: "AA", v: "Z", telemetry_id: "Quai_Fa_Ngum_East", surface: "paved" },
+  { u: "Z", v: "AB", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AB", v: "W", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "Y", v: "AB", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "Y", v: "AE", telemetry_id: "Samsenthai_Rd", surface: "unpaved" },
+  { u: "AE", v: "AB", telemetry_id: "Samsenthai_Rd", surface: "unpaved" },
+  { u: "AF", v: "U", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AF", v: "S", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AG", v: "S", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AG", v: "N", telemetry_id: "Samsenthai_Rd", surface: "unpaved" },
+  { u: "AI", v: "S", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AI", v: "AH", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AH", v: "I", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "AH", v: "X", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "AJ", v: "X", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "AJ", v: "R", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "AJ", v: "Q", telemetry_id: "Lane_Xang_Ave", surface: "paved" },
+  { u: "AK", v: "Q", telemetry_id: "Lane_Xang_Ave", surface: "unpaved" },
+  { u: "AK", v: "W", telemetry_id: "Lane_Xang_Ave", surface: "unpaved" },
+  { u: "AL", v: "AC", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "AL", v: "AD", telemetry_id: "Setthathilath_Rd", surface: "paved" },
+  { u: "AM", v: "AE", telemetry_id: "Samsenthai_Rd", surface: "unpaved" },
+  { u: "AM", v: "AB", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AN", v: "AD", telemetry_id: "Quai_Fa_Ngum_East", surface: "paved" },
+  { u: "AN", v: "A", telemetry_id: "Quai_Fa_Ngum_West", surface: "paved" },
+  { u: "AO", v: "G", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AO", v: "H", telemetry_id: "Samsenthai_Rd", surface: "paved" },
+  { u: "AO", v: "Y", telemetry_id: "Samsenthai_Rd", surface: "paved" }
+];
+
+const getAdjacencyList = () => {
+  const adj = {};
+  GAME_EDGES.forEach(edge => {
+    if (!adj[edge.u]) adj[edge.u] = [];
+    if (!adj[edge.v]) adj[edge.v] = [];
+    adj[edge.u].push({ target: edge.v, telemetry_id: edge.telemetry_id, surface: edge.surface });
+    adj[edge.v].push({ target: edge.u, telemetry_id: edge.telemetry_id, surface: edge.surface });
+  });
+  return adj;
+};
+
 const TRANSLATIONS = {
   ko: {
     brand_title: "벨로루트 비엔티안",
@@ -199,7 +283,36 @@ const TRANSLATIONS = {
     oracle_safe: "정상 상태: 현재 메콩강 수위가 도로 경계 이하에 머물러 있으며, 도로 표면의 정지 마찰 계수(μ ≈ 0.65)가 안정적으로 확보되어 차량 제어력이 우수합니다. 관성의 법칙에 따라 급제동 시에도 미끄러짐이 적으나, 빗길 안전거리는 항상 유지하십시오.",
     oracle_caution: "주의 상태: 폭우로 인해 노면이 젖으며 마찰 계수가 급격히 저하되고 있습니다. 특히 비포장 지름길은 점성 진흙이 되어 타이어의 구름 저항을 높이고 정지 마찰력을 파괴하여 차량 전복 확률을 급증시킵니다. 물리 법칙에 따라 마찰력의 한계를 존중하며 서행해야 합니다.",
     oracle_warning: "경고 상태: 침수가 시작되며 차량이 아르키메데스의 부력(Fb = ρgV)을 받기 시작합니다. 물에 잠긴 부피에 비례하여 부력이 커짐에 따라, 지면이 받쳐주는 수직항력(N = mg - Fb)이 급감합니다. 마찰력 공식 f = μN에 따라 접지 마찰력이 거의 소실되어 뚝뚝이나 오토바이는 쉽게 빗길에 미끄러져 유실될 수 있습니다.",
-    oracle_critical: "위험 상태: 메콩강 횡류에 의한 유체 저항력(항력 Fd = 1/2 Cd ρ A v²)이 타이어의 극소화된 최대 마찰 한계를 초과했습니다! 수직항력이 0에 수렴하여 바퀴가 공중에 뜬 수중 부유 상태가 되었으며, 이 상황에서는 아주 작은 물살의 힘으로도 차량이 강으로 쓸려 내려가는 물리적 파국을 피할 수 없습니다. 즉시 대피하십시오."
+    oracle_critical: "위험 상태: 메콩강 횡류에 의한 유체 저항력(항력 Fd = 1/2 Cd ρ A v²)이 타이어의 극소화된 최대 마찰 한계를 초과했습니다! 수직항력이 0에 수렴하여 바퀴가 공중에 뜬 수중 부유 상태가 되었으며, 이 상황에서는 아주 작은 물살의 힘으로도 차량이 강으로 쓸려 내려가는 물리적 파국을 피할 수 없습니다. 즉시 대피하십시오.",
+    game_btn: "🎮 부스 대피 게임",
+    game_title: "🚨 비엔티안 홍수 탈출 챌린지 🚨",
+    game_select_vehicle: "부스 대피 챌린지 - 차량 선택",
+    game_desc: "폭우로 메콩강이 범람하고 있습니다! 침수 구간과 도로 장애물을 피해 제한시간(골든타임) 내에 녹색 대피소로 안전하게 탈출하세요. 키보드 방향키 또는 화면 버튼으로 조작합니다.",
+    game_vehicle_tuktuk_desc: "뚝뚝(어려움): 수위 한계 0.15m, 진흙 지연 매우 심함, 점수 2.0배",
+    game_vehicle_moto_desc: "오토바이(보통): 수위 한계 0.22m, 수막현상 슬립 위험, 점수 1.2배",
+    game_vehicle_car_desc: "승용차(쉬움): 수위 한계 0.30m, 무겁고 안정적이나 기본 속도 느림, 점수 1.0배",
+    game_start_btn: "운전 시작하기 (Start)",
+    game_health: "차량 내구성 (Health)",
+    game_time: "남은 시간 (Time)",
+    game_current_pos: "현재 위치",
+    game_target_pos: "목적 대피소",
+    game_over_title: "💀 차량 침수 / 시간 초과 (탈출 실패) 💀",
+    game_over_desc: "차량 엔진이 침수되어 꺼졌거나 골든타임을 초과하였습니다.",
+    game_clear_title: "🛡️ 안전 대피 성공! (SUCCESS) 🛡️",
+    game_clear_desc: "무사히 고지대 대피소에 도달하여 대피에 성공했습니다!",
+    game_final_score: "최종 대피 점수",
+    game_enter_name: "이름을 입력하여 랭킹에 등록하세요:",
+    game_leaderboard_title: "🏆 명예의 전당 (Leaderboard)",
+    game_rank: "순위",
+    game_name: "이름",
+    game_score: "점수",
+    game_vehicle: "차량",
+    game_time_rem: "시간",
+    game_health_rem: "체력",
+    game_exit_btn: "게임 종료 (Exit)",
+    game_restart_btn: "다시 도전",
+    game_rank_register: "등록",
+    game_rank_msg: "랭킹에 기록되었습니다!"
   },
   lo: {
     brand_title: "ເວໂລຣູດ ວຽງຈັນ",
@@ -280,7 +393,36 @@ const TRANSLATIONS = {
     oracle_warning: "ສະພາບເຕືອນໄພ: ເລີ່ມມີນ້ຳຖ້ວມຂັງ ແລະ ພາຫະນະໄດ້ຮັບແຮງຟູ (Fb = ρgV) ຕາມກົດເກນອາກຊີເມດ. ແຮງຟູທີ່ເພີ່ມຂຶ້ນຕາມບໍລິມາດທີ່ຈົມນ້ຳ ເຮັດໃຫ້ແຮງປະຕິກິລິຍາຕັ້ງສາກ (N = mg - Fb) ຫຼຸດລົງຢ່າງແຮງ. ອີງຕາມສູດແຮງຮຸກຖູ f = μN ແຮງຍຶດເກາະເກືອບຈະໝົດໄປ ເຮັດໃຫ້ລົດຕຸກຕຸກ ຫຼື ລົດຈັກມື່ນໄຫຼໄດ້ງ່າຍ.",
     oracle_critical: "ສະພາບອັນຕະລາຍ: ແຮງຕ້ານທານຈາກກະແສນ້ຳໄຫຼ (Fd = 1/2 Cd ρ A v²) ໄດ້ເກີນຂີດຈຳກັດແຮງຮຸກຖູສູງສຸດຂອງຢາງລົດແລ້ວ! ແຮງປະຕິກິລິຍາຕັ້ງສາກໃກ້ກັບ 0 ເຮັດໃຫ້ລົດຟູລອຍ. ໃນສະພາບນີ້ ພຽງແຕ່ແຮງນ້ຳໄຫຼໜ້ອຍໜຶ່ງກໍສາມາດພັດລົດໄຫຼໄປໄດ້. ກະລຸນาອົບພະຍົບທັນທີ.",
     audio_mute: "ປິດສຽງເຕືອນ",
-    audio_unmute: "ເປີດສຽງເຕືອນ"
+    audio_unmute: "ເປີດສຽງເຕືອນ",
+    game_btn: "🎮 ເກມອົບພະຍົບ",
+    game_title: "🚨 ເກມຫຼີກລ່ຽງນ້ຳຖ້ວມ ວຽງຈັນ 🚨",
+    game_select_vehicle: "ເລືອກພາຫະນະອົບພະຍົບ",
+    game_desc: "ນ້ຳຂອງພວມຖ້ວມ! ກະລຸນາຂັບຂີ່ຫຼີກລ່ຽງທາງນ້ຳຖ້ວມ ແລະ ສິ່ງກີດຂວາງ ເພື່ອໄປຫາສູນອົບພະຍົບພາຍໃນເວລາທອງ. ຄວບຄຸມດ້ວຍປຸ່ມລູກສອນ ຫຼື ປຸ່ມໜ້າຈໍ.",
+    game_vehicle_tuktuk_desc: "ຕຸກຕຸກ (ຍາກ): ຈຳກັດນ້ຳ 0.15m, ທາງຕົມຊ້າຫຼາຍ, ຄະແນນ 2.0x",
+    game_vehicle_moto_desc: "ລົດຈັກ (ປານກາງ): ຈຳກັດນ້ຳ 0.22m, ລະວັງເລື່ອນສະໄລ້, ຄະແນນ 1.2x",
+    game_vehicle_car_desc: "ລົດໃຫຍ່ (ງ່າຍ): ຈຳກັດນ້ຳ 0.30m, ໝັ້ນຄົງດີແຕ່ຊ້າກວ່າ, ຄະແນນ 1.0x",
+    game_start_btn: "ເລີ່ມຕົ້ນຂັບຂີ່ (Start)",
+    game_health: "ຄວາມທົນທານລົດ (Health)",
+    game_time: "ເວລາເຫຼືອ (Time)",
+    game_current_pos: "ຈຸດປະຈຸບັນ",
+    game_target_pos: "ສູນອົບພະຍົບເປົ້າໝາຍ",
+    game_over_title: "💀 ລົດຈົມນ້ຳ / ເວລາໝົດ (ອົບພະຍົບຫຼົ້ມເຫຼວ) 💀",
+    game_over_desc: "ເຄື່ອງຈັກລົດຈົມນ້ຳ ແລະ ມອດ ຫຼື ກາຍເວລາທອງໃນການອົບພະຍົບແລ້ວ.",
+    game_clear_title: "🛡️ ອົບພະຍົບສຳເລັດ! (SUCCESS) 🛡️",
+    game_clear_desc: "ທ່ານໄດ້ເດີນທາງຮອດ ສູນອົບພະຍົບ ເຂດເນີນສູງຢ່າງປອດໄພແລ້ວ!",
+    game_final_score: "ຄະແນນສຸດທ້າຍ",
+    game_enter_name: "ປ້ອນຊື່ຂອງທ່ານເພື່ອບັນທຶກຄະແນນ:",
+    game_leaderboard_title: "🏆 ຕາຕະລາງຄະແນນສູງສຸດ (Leaderboard)",
+    game_rank: "ອັນດັບ",
+    game_name: "ຊື່",
+    game_score: "ຄະແນນ",
+    game_vehicle: "ພາຫະນະ",
+    game_time_rem: "ເວລາເຫຼືອ",
+    game_health_rem: "ສຸຂະພາບ",
+    game_exit_btn: "ອອກຈາກເກມ (Exit)",
+    game_restart_btn: "ຫຼິ້ນຄືນໃໝ່",
+    game_rank_register: "ບັນທຶກ",
+    game_rank_msg: "ບັນທຶກຄະແນນສຳເລັດແລ້ວ!"
   }
 };
 
@@ -315,6 +457,32 @@ export default function App() {
   const [endNode, setEndNode] = useState('I');
   const [vehicle, setVehicle] = useState('tuktuk'); // tuktuk, motorcycle, car
   
+  // ── Booth Challenge Game States ────────────────────────────
+  const [isGameMode, setIsGameMode] = useState(false);
+  const [gameVehicle, setGameVehicle] = useState('tuktuk');
+  const [gamePlayerNode, setGamePlayerNode] = useState('A');
+  const [gameTargetNode, setGameTargetNode] = useState('I');
+  const [gameHealth, setGameHealth] = useState(100);
+  const [gameTimeLeft, setGameTimeLeft] = useState(60);
+  const [gameScore, setGameScore] = useState(0);
+  const [gameWin, setGameWin] = useState(false);
+  const [gameShowSelect, setGameShowSelect] = useState(false);
+  const [gameNameInput, setGameNameInput] = useState('');
+  const [gameRankRegistered, setGameRankRegistered] = useState(false);
+  
+  const [gameLeaderboard, setGameLeaderboard] = useState(() => {
+    try {
+      const saved = localStorage.getItem('veloroute_leaderboard');
+      return saved ? JSON.parse(saved) : [
+        { name: "Somsack", score: 1200, vehicle: "motorcycle", time: 42, health: 80 },
+        { name: "김철수", score: 950, vehicle: "tuktuk", time: 30, health: 50 },
+        { name: "Thipphone", score: 800, vehicle: "car", time: 35, health: 90 }
+      ];
+    } catch (e) {
+      return [];
+    }
+  });
+  
   // New Evacuation and Hazard States
   const [isEvacMode, setIsEvacMode] = useState(false);
   const [hazards, setHazards] = useState([]);
@@ -346,6 +514,247 @@ export default function App() {
       .then(data => setNodes(data))
       .catch(err => console.error("Error loading nodes:", err));
   }, []);
+
+  // ── Web Audio API Sound Synthesizer ────────────────────────
+  const playTone = useCallback((freq, duration, type = 'sine') => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  }, []);
+
+  // ── Game Start/Clear/Over/Move Mechanics ───────────────────
+  const startGame = (vehicleType) => {
+    setGameVehicle(vehicleType);
+    setGameHealth(100);
+    setGameTimeLeft(60);
+    setGameScore(0);
+    setGameWin(false);
+    setGameRankRegistered(false);
+    setGameNameInput('');
+    
+    // 저지대 출발노드 임의 지정
+    const dangerStarts = ["A", "B", "C", "M", "AN", "AD"];
+    const randomStart = dangerStarts[Math.floor(Math.random() * dangerStarts.length)];
+    setGamePlayerNode(randomStart);
+    
+    // 목적 대피소 임의 지정
+    const shelterNodes = ["F", "H", "I", "Q", "V"];
+    const randomTarget = shelterNodes[Math.floor(Math.random() * shelterNodes.length)];
+    setGameTargetNode(randomTarget);
+    
+    // 환경 시뮬레이션 설정 (폭우 상태 강제조정)
+    setRainIntensity(100);
+    setRiverLevel(11.2);
+    
+    // 게임 시작 모드 활성화 및 선택 팝업 닫기
+    setIsGameMode(true);
+    setGameShowSelect(false);
+    
+    // 오디오 피드백
+    playTone(440, 0.1);
+    setTimeout(() => playTone(440, 0.1), 150);
+    setTimeout(() => playTone(880, 0.3), 300);
+  };
+
+  const handleGameClear = useCallback((finalTime, finalHealth) => {
+    setIsGameMode(false);
+    playTone(523.25, 0.1);
+    setTimeout(() => playTone(659.25, 0.1), 100);
+    setTimeout(() => playTone(783.99, 0.1), 200);
+    setTimeout(() => playTone(1046.50, 0.45), 300);
+    
+    const difficultyMultipliers = { tuktuk: 2.0, motorcycle: 1.2, car: 1.0 };
+    const mult = difficultyMultipliers[gameVehicle] || 1.0;
+    const score = Math.round(((finalTime * 10) + (finalHealth * 15)) * mult);
+    setGameScore(score);
+    setGameWin(true);
+  }, [gameVehicle, playTone]);
+
+  const handleGameMove = useCallback((direction) => {
+    if (!isGameMode || gameHealth <= 0 || gameTimeLeft <= 0) return;
+    
+    const adj = getAdjacencyList();
+    const neighbors = adj[gamePlayerNode] || [];
+    if (neighbors.length === 0) return;
+    
+    const currCoord = nodes[gamePlayerNode];
+    if (!currCoord) return;
+    
+    let bestTarget = null;
+    let maxScore = -999;
+    
+    neighbors.forEach(n => {
+      const targetCoord = nodes[n.target];
+      if (!targetCoord) return;
+      
+      const dy = targetCoord.lat - currCoord.lat;
+      const dx = targetCoord.lng - currCoord.lng;
+      
+      let score = -999;
+      if (direction === 'UP') {
+        score = dy - Math.abs(dx) * 0.5;
+      } else if (direction === 'DOWN') {
+        score = -dy - Math.abs(dx) * 0.5;
+      } else if (direction === 'LEFT') {
+        score = -dx - Math.abs(dy) * 0.5;
+      } else if (direction === 'RIGHT') {
+        score = dx - Math.abs(dy) * 0.5;
+      }
+      
+      const isBlockedByHazard = hazards.some(h => h.node_id === n.target);
+      if (isBlockedByHazard) {
+        score -= 5.0; // 장애물 구간 강한 회피
+      }
+      
+      if (score > maxScore) {
+        maxScore = score;
+        bestTarget = n;
+      }
+    });
+    
+    if (bestTarget) {
+      const targetNodeId = bestTarget.target;
+      playTone(600, 0.05);
+      setGamePlayerNode(targetNodeId);
+      
+      // 침수 및 흙길 페널티 계산
+      let depth = 0;
+      if (telemetry && telemetry[bestTarget.telemetry_id]) {
+        depth = telemetry[bestTarget.telemetry_id].water_depth_m || 0;
+      }
+      
+      const limits = { tuktuk: 0.15, motorcycle: 0.22, car: 0.30 };
+      const limit = limits[gameVehicle] || 0.30;
+      
+      if (depth >= limit) {
+        const dmg = Math.round((depth - limit + 0.15) * 50);
+        setGameHealth(h => {
+          const nextH = Math.max(0, h - dmg);
+          if (nextH <= 0) {
+            setIsGameMode(false);
+            playTone(150, 0.5, 'sawtooth');
+          } else {
+            playTone(200, 0.15, 'sawtooth');
+          }
+          return nextH;
+        });
+      } else if (depth > 0.02) {
+        setGameHealth(h => Math.max(0, h - 3));
+        playTone(300, 0.1);
+      }
+      
+      if (bestTarget.surface === 'unpaved') {
+        setGameTimeLeft(t => Math.max(0, t - 2)); // 2초 지연
+        playTone(250, 0.1, 'sawtooth');
+      }
+      
+      if (targetNodeId === gameTargetNode) {
+        handleGameClear(gameTimeLeft, gameHealth);
+      }
+    }
+  }, [isGameMode, gamePlayerNode, nodes, gameVehicle, telemetry, hazards, gameTargetNode, gameHealth, gameTimeLeft, handleGameClear, playTone]);
+
+  // 키보드 리스너 등록
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isGameMode) return;
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        handleGameMove('UP');
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        handleGameMove('DOWN');
+      } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        handleGameMove('LEFT');
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        handleGameMove('RIGHT');
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isGameMode, handleGameMove]);
+
+  // 타이머 루프
+  useEffect(() => {
+    if (!isGameMode || gameHealth <= 0 || gameTimeLeft <= 0) return;
+    
+    const timer = setInterval(() => {
+      setGameTimeLeft(t => {
+        if (t <= 1) {
+          clearInterval(timer);
+          setIsGameMode(false);
+          playTone(150, 0.5, 'sawtooth');
+          return 0;
+        }
+        return t - 1;
+      });
+      
+      // 정차 침수 데미지
+      const adj = getAdjacencyList();
+      const neighbors = adj[gamePlayerNode] || [];
+      let maxDepth = 0;
+      neighbors.forEach(n => {
+        if (telemetry && telemetry[n.telemetry_id]) {
+          const d = telemetry[n.telemetry_id].water_depth_m || 0;
+          if (d > maxDepth) maxDepth = d;
+        }
+      });
+      
+      const limits = { tuktuk: 0.15, motorcycle: 0.22, car: 0.30 };
+      const limit = limits[gameVehicle] || 0.30;
+      if (maxDepth >= limit) {
+        setGameHealth(h => {
+          const nextH = Math.max(0, h - 4);
+          if (nextH <= 0) {
+            setIsGameMode(false);
+            playTone(150, 0.5, 'sawtooth');
+          }
+          return nextH;
+        });
+      }
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [isGameMode, gamePlayerNode, gameVehicle, telemetry, gameHealth, gameTimeLeft, playTone]);
+
+  // 랭킹 등록
+  const registerHighScore = () => {
+    if (!gameNameInput.trim()) return;
+    const newEntry = {
+      name: gameNameInput,
+      score: gameScore,
+      vehicle: gameVehicle,
+      time: gameTimeLeft,
+      health: gameHealth
+    };
+    
+    const updated = [...gameLeaderboard, newEntry]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5); // 5개만 유지
+      
+    setGameLeaderboard(updated);
+    localStorage.setItem('veloroute_leaderboard', JSON.stringify(updated));
+    setGameRankRegistered(true);
+    playTone(880, 0.15);
+    setTimeout(() => playTone(1000, 0.2), 150);
+  };
 
 
   // Helper to fetch active hazards
@@ -840,6 +1249,37 @@ export default function App() {
               <span>🇱🇦</span> LO
             </button>
           </div>
+
+          {/* Booth Game Mode Button */}
+          <button
+            onClick={() => {
+              if (isGameMode) {
+                setIsGameMode(false);
+                setGameWin(false);
+                playTone(200, 0.2, 'sawtooth');
+              } else {
+                setGameShowSelect(true);
+                playTone(600, 0.1);
+              }
+            }}
+            style={{
+              background: isGameMode ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+              border: isGameMode ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(16, 185, 129, 0.5)',
+              color: isGameMode ? '#fca5a5' : '#a7f3d0',
+              borderRadius: '8px',
+              padding: '0.3rem 0.6rem',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              transition: 'all 0.2s',
+              boxShadow: isGameMode ? '0 0 8px rgba(239,68,68,0.3)' : '0 0 8px rgba(16,185,129,0.3)'
+            }}
+          >
+            {isGameMode ? t('game_exit_btn') : t('game_btn')}
+          </button>
         </div>
         
         {/* Telemetry Telemetry Info */}
@@ -1161,6 +1601,26 @@ export default function App() {
               strokeWidth = 2.5; // Bold outline
             }
             
+            // Overrides for game mode
+            if (isGameMode) {
+              if (id === gamePlayerNode) {
+                markerColor = '#38bdf8'; // Glowing blue for player
+                radius = 12;
+                strokeColor = '#e0f2fe';
+                strokeWidth = 3;
+              } else if (id === gameTargetNode) {
+                markerColor = '#22c55e'; // Bright green for shelter target
+                radius = 12;
+                strokeColor = '#fef08a'; // Yellow outline
+                strokeWidth = 3.5;
+              } else {
+                markerColor = 'rgba(148, 163, 184, 0.4)';
+                radius = 5.5;
+                strokeColor = 'rgba(255,255,255,0.2)';
+                strokeWidth = 1;
+              }
+            }
+            
             // Overrides for hazard nodes
             if (hazardOnNode) {
               markerColor = '#f97316'; // Orange warning
@@ -1181,84 +1641,101 @@ export default function App() {
               >
                 <Popup>
                   <div style={{ color: '#000', fontSize: '0.85rem', width: '220px' }}>
-                    <h4 style={{ fontWeight: '700', borderBottom: '1px solid #ddd', paddingBottom: '0.25rem', marginBottom: '0.4rem' }}>
-                      {t('node_popup_title')} {id} {isShelterNode && `🛡️ (${t('node_shelter')})`}
-                    </h4>
-                    <p style={{ margin: '0.2rem 0', fontWeight: '500', lineHeight: 1.2 }}>{getNodeLabel(id) || info.name}</p>
-                    <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>{t('node_elevation')}: {info.elevation}m</p>
-                    
-                    {/* 경로 설정 버튼 */}
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      <button 
-                        onClick={() => setStartNode(id)}
-                        style={{ padding: '0.25rem 0.4rem', cursor: 'pointer', fontSize: '0.75rem', flex: 1, backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px' }}
-                      >
-                        {t('node_start_btn')}
-                      </button>
-                      <button 
-                        onClick={() => setEndNode(id)}
-                        disabled={isEvacMode}
-                        style={{ 
-                          padding: '0.25rem 0.4rem', 
-                          cursor: isEvacMode ? 'not-allowed' : 'pointer', 
-                          fontSize: '0.75rem', 
-                          flex: 1, 
-                          backgroundColor: isEvacMode ? '#ccc' : '#a855f7', 
-                          color: '#fff', 
-                          border: 'none', 
-                          borderRadius: '4px' 
-                        }}
-                      >
-                        {t('node_end_btn')}
-                      </button>
-                    </div>
+                    {isGameMode ? (
+                      <div style={{ padding: '0.25rem 0' }}>
+                        <h4 style={{ fontWeight: '700', borderBottom: '1px solid #ddd', paddingBottom: '0.25rem', marginBottom: '0.4rem' }}>
+                          Challenge Node {id}
+                        </h4>
+                        <p style={{ margin: '0.2rem 0', fontWeight: '600' }}>{getNodeLabel(id) || info.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: '#666' }}>{t('node_elevation')}: {info.elevation}m</p>
+                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.3rem', alignItems: 'center', fontWeight: 'bold', fontSize: '0.8rem', color: id === gamePlayerNode ? '#3b82f6' : (id === gameTargetNode ? '#10b981' : '#666') }}>
+                          {id === gamePlayerNode && <span>🚗 {lang === 'ko' ? '내 위치' : 'ຂ້ອຍຢູ່ ນີ້'}</span>}
+                          {id === gameTargetNode && <span>🏁 {lang === 'ko' ? '목적지 대피소' : 'ສູນອົບພະຍົບເປົ້າໝາຍ'}</span>}
+                          {id !== gamePlayerNode && id !== gameTargetNode && <span>{lang === 'ko' ? '이동 가능 교차로' : 'ທາງແຍກຜ່ານ'}</span>}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h4 style={{ fontWeight: '700', borderBottom: '1px solid #ddd', paddingBottom: '0.25rem', marginBottom: '0.4rem' }}>
+                          {t('node_popup_title')} {id} {isShelterNode && `🛡️ (${t('node_shelter')})`}
+                        </h4>
+                        <p style={{ margin: '0.2rem 0', fontWeight: '500', lineHeight: 1.2 }}>{getNodeLabel(id) || info.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>{t('node_elevation')}: {info.elevation}m</p>
+                        
+                        {/* 경로 설정 버튼 */}
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                          <button 
+                            onClick={() => setStartNode(id)}
+                            style={{ padding: '0.25rem 0.4rem', cursor: 'pointer', fontSize: '0.75rem', flex: 1, backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px' }}
+                          >
+                            {t('node_start_btn')}
+                          </button>
+                          <button 
+                            onClick={() => setEndNode(id)}
+                            disabled={isEvacMode}
+                            style={{ 
+                              padding: '0.25rem 0.4rem', 
+                              cursor: isEvacMode ? 'not-allowed' : 'pointer', 
+                              fontSize: '0.75rem', 
+                              flex: 1, 
+                              backgroundColor: isEvacMode ? '#ccc' : '#a855f7', 
+                              color: '#fff', 
+                              border: 'none', 
+                              borderRadius: '4px' 
+                            }}
+                          >
+                            {t('node_end_btn')}
+                          </button>
+                        </div>
 
-                    {/* 실시간 장애물 제보 섹션 */}
-                    <div style={{ borderTop: '1px solid #eee', paddingTop: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f97316', display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.35rem' }}>
-                        <AlertTriangle size={12} /> {t('node_hazard_report')}
-                      </span>
-                      
-                      {hazardOnNode ? (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fee2e2', padding: '0.3rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem' }}>
-                          <span style={{ color: '#ef4444', fontWeight: 'bold' }}>{getHazardLabel(hazardOnNode.hazard_type)} {t('node_hazard_registered')}</span>
-                          <button 
-                            onClick={() => handleRemoveSingleHazard(id)}
-                            style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                            title="해제하기"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                        {/* 실시간 장애물 제보 섹션 */}
+                        <div style={{ borderTop: '1px solid #eee', paddingTop: '0.5rem' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f97316', display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.35rem' }}>
+                            <AlertTriangle size={12} /> {t('node_hazard_report')}
+                          </span>
+                          
+                          {hazardOnNode ? (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fee2e2', padding: '0.3rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                              <span style={{ color: '#ef4444', fontWeight: 'bold' }}>{getHazardLabel(hazardOnNode.hazard_type)} {t('node_hazard_registered')}</span>
+                              <button 
+                                onClick={() => handleRemoveSingleHazard(id)}
+                                style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                title="해제하기"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.25rem' }}>
+                              <button 
+                                onClick={() => handleReportHazard(id, 'flood')}
+                                style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
+                              >
+                                {t('node_hazard_flood')}
+                              </button>
+                              <button 
+                                onClick={() => handleReportHazard(id, 'accident')}
+                                style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
+                              >
+                                {t('node_hazard_accident')}
+                              </button>
+                              <button 
+                                onClick={() => handleReportHazard(id, 'pothole')}
+                                style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
+                              >
+                                {t('node_hazard_pothole')}
+                              </button>
+                              <button 
+                                onClick={() => handleReportHazard(id, 'police')}
+                                style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
+                              >
+                                {t('node_hazard_police')}
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.25rem' }}>
-                          <button 
-                            onClick={() => handleReportHazard(id, 'flood')}
-                            style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
-                          >
-                            {t('node_hazard_flood')}
-                          </button>
-                          <button 
-                            onClick={() => handleReportHazard(id, 'accident')}
-                            style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
-                          >
-                            {t('node_hazard_accident')}
-                          </button>
-                          <button 
-                            onClick={() => handleReportHazard(id, 'pothole')}
-                            style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
-                          >
-                            {t('node_hazard_pothole')}
-                          </button>
-                          <button 
-                            onClick={() => handleReportHazard(id, 'police')}
-                            style={{ padding: '0.25rem 0.2rem', fontSize: '0.7rem', cursor: 'pointer', border: '1px solid #ddd', borderRadius: '4px', background: '#f8fafc' }}
-                          >
-                            {t('node_hazard_police')}
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                      </>
+                    )}
                   </div>
                 </Popup>
               </CircleMarker>
@@ -1266,7 +1743,7 @@ export default function App() {
           })}
 
           {/* Draw safety route polyline on map */}
-          {routeData && routeData.geojson && (
+          {!isGameMode && routeData && routeData.geojson && (
             <Polyline
               positions={routeData.geojson.geometry.coordinates.map(pt => [pt[1], pt[0]])}
               pathOptions={{
@@ -1280,120 +1757,135 @@ export default function App() {
         </MapContainer>
 
         {/* Floating Route Status Overlay */}
-        <div className="map-overlay-widget" style={{ border: isEvacMode ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)' }}>
-          <div className="widget-header" style={{ color: isEvacMode ? '#ef4444' : '#e2e8f0' }}>
-            {isEvacMode ? <Shield size={16} /> : <Navigation2 size={16} />}
-            <span>{isEvacMode ? t('feed_title_evac') : t('feed_title_normal')}</span>
-          </div>
-
-          {errorMsg ? (
-            <div className="widget-remarks" style={{ background: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#fca5a5' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{translateError(errorMsg)}</span>
-              </div>
+        {/* Floating Route Status Overlay */}
+        {!isGameMode ? (
+          <div className="map-overlay-widget" style={{ border: isEvacMode ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <div className="widget-header" style={{ color: isEvacMode ? '#ef4444' : '#e2e8f0' }}>
+              {isEvacMode ? <Shield size={16} /> : <Navigation2 size={16} />}
+              <span>{isEvacMode ? t('feed_title_evac') : t('feed_title_normal')}</span>
             </div>
-          ) : routeData ? (
-            <>
-              {isEvacMode && routeData.shelter_name && (
-                <div className="widget-remarks" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#a7f3d0', marginBottom: '0.2rem' }}>
-                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                    <Shield size={14} style={{ color: '#10b981' }} />
-                    <span style={{ fontWeight: 'bold' }}>{t('shelter_dest')}: {getNodeLabel(routeData.shelter_name) || routeData.shelter_name}</span>
-                  </div>
-                </div>
-              )}
-              {/* [인성적 설득: Ethos] 시스템의 신뢰도 및 공신력 표출 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#60a5fa', background: 'rgba(59, 130, 246, 0.08)', padding: '0.35rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)', marginBottom: '0.3rem' }}>
-                <Shield size={12} />
-                <span>{t('cert_label')}</span>
-              </div>
 
-              <div className="widget-stat">
-                <span className="widget-label">{t('distance')}</span>
-                <span className="widget-value">{routeData.distance_m} m</span>
-              </div>
-
-              {/* [이성적 설득: Logos] 과학적이고 귀납적인 안전 수치 제시 */}
-              <div className="widget-stat" style={{ color: 'var(--status-safe)' }}>
-                <span className="widget-label" style={{ color: 'rgba(16, 185, 129, 0.85)', fontWeight: '600' }}>{t('safety_index')}</span>
-                <span className="widget-value" style={{ fontWeight: '700' }}>
-                  {routeData.geojson?.properties?.max_water_depth === 0 ? t('logos_safe_value') : t('logos_caution_value')}
-                </span>
-              </div>
-              <div className="widget-stat">
-                <span className="widget-label">{t('max_water')}</span>
-                <span className="widget-value">{routeData.geojson?.properties?.max_water_depth?.toFixed(3) || 0.000} m</span>
-              </div>
-              <div className="widget-stat">
-                <span className="widget-label">{t('selected_vehicle')}</span>
-                <span className="widget-value">
-                  {getVehicleKorean(routeData.vehicle)}
-                </span>
-              </div>
-              <div className="widget-remarks">
+            {errorMsg ? (
+              <div className="widget-remarks" style={{ background: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#fca5a5' }}>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                  <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span>{routeData.remarks?.map(r => translateRemark(r)).join(" ") || t('route_ok')}</span>
+                  <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span>{translateError(errorMsg)}</span>
                 </div>
               </div>
-
-              {/* 실시간 물리 역학 시뮬레이션 데이터 분석 대시보드 */}
-              {(() => {
-                const maxDepth = routeData.geojson?.properties?.max_water_depth || 0;
-                const phys = calculatePhysics(routeData.vehicle, maxDepth);
-                return (
-                  <div style={{
-                    marginTop: '0.4rem',
-                    padding: '0.4rem 0.5rem',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                    borderRadius: '8px',
-                    fontSize: '0.72rem'
-                  }}>
-                    <div style={{
-                      fontWeight: 'bold',
-                      color: 'rgba(96, 165, 250, 0.95)',
-                      marginBottom: '0.25rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-                      paddingBottom: '0.2rem'
-                    }}>
-                      <Info size={12} />
-                      <span>{t('physics_title')}</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                        <span>{t('physics_grip')} (Grip)</span>
-                        <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : phys.gripRemaining > 40 ? '#eab308' : '#ef4444' }}>
-                          {phys.gripRemaining} %
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                        <span>{t('physics_buoyancy')} (Buoyancy)</span>
-                        <span style={{ color: '#60a5fa' }}>{phys.fb} N</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                        <span>{t('physics_vlimit')} (Limit Speed)</span>
-                        <span style={{ color: '#fca5a5', fontWeight: 'bold' }}>{phys.vLimitKmh} km/h</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                        <span>{t('physics_drag')} (Fluid Drag)</span>
-                        <span style={{ color: '#f472b6' }}>{phys.fd} N</span>
-                      </div>
+            ) : routeData ? (
+              <>
+                {isEvacMode && routeData.shelter_name && (
+                  <div className="widget-remarks" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#a7f3d0', marginBottom: '0.2rem' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <Shield size={14} style={{ color: '#10b981' }} />
+                      <span style={{ fontWeight: 'bold' }}>{t('shelter_dest')}: {getNodeLabel(routeData.shelter_name) || routeData.shelter_name}</span>
                     </div>
                   </div>
-                );
-              })()}
-            </>
-          ) : (
-            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-              {t('cal_routing')}
+                )}
+                {/* [인성적 설득: Ethos] 시스템의 신뢰도 및 공신력 표출 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#60a5fa', background: 'rgba(59, 130, 246, 0.08)', padding: '0.35rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)', marginBottom: '0.3rem' }}>
+                  <Shield size={12} />
+                  <span>{t('cert_label')}</span>
+                </div>
+
+                <div className="widget-stat">
+                  <span className="widget-label">{t('distance')}</span>
+                  <span className="widget-value">{routeData.distance_m} m</span>
+                </div>
+
+                {/* [이성적 설득: Logos] 과학적이고 귀납적인 안전 수치 제시 */}
+                <div className="widget-stat" style={{ color: 'var(--status-safe)' }}>
+                  <span className="widget-label" style={{ color: 'rgba(16, 185, 129, 0.85)', fontWeight: '600' }}>{t('safety_index')}</span>
+                  <span className="widget-value" style={{ fontWeight: '700' }}>
+                    {routeData.geojson?.properties?.max_water_depth === 0 ? t('logos_safe_value') : t('logos_caution_value')}
+                  </span>
+                </div>
+                <div className="widget-stat">
+                  <span className="widget-label">{t('max_water')}</span>
+                  <span className="widget-value">{routeData.geojson?.properties?.max_water_depth?.toFixed(3) || 0.000} m</span>
+                </div>
+                <div className="widget-stat">
+                  <span className="widget-label">{t('selected_vehicle')}</span>
+                  <span className="widget-value">
+                    {getVehicleKorean(routeData.vehicle)}
+                  </span>
+                </div>
+                <div className="widget-remarks">
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                    <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span>{routeData.remarks?.map(r => translateRemark(r)).join(" ") || t('route_ok')}</span>
+                  </div>
+                </div>
+
+                {/* 실시간 물리 역학 시뮬레이션 데이터 분석 대시보드 */}
+                {(() => {
+                  const maxDepth = routeData.geojson?.properties?.max_water_depth || 0;
+                  const phys = calculatePhysics(routeData.vehicle, maxDepth);
+                  return (
+                    <div style={{
+                      marginTop: '0.4rem',
+                      padding: '0.4rem 0.5rem',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      borderRadius: '8px',
+                      fontSize: '0.72rem'
+                    }}>
+                      <div style={{
+                        fontWeight: 'bold',
+                        color: 'rgba(96, 165, 250, 0.95)',
+                        marginBottom: '0.25rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                        paddingBottom: '0.2rem'
+                      }}>
+                        <Info size={12} />
+                        <span>{t('physics_title')}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>{t('physics_grip')} (Grip)</span>
+                          <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : phys.gripRemaining > 40 ? '#eab308' : '#ef4444' }}>
+                            {phys.gripRemaining} %
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>{t('physics_buoyancy')} (Buoyancy)</span>
+                          <span style={{ color: '#60a5fa' }}>{phys.fb} N</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>{t('physics_vlimit')} (Limit Speed)</span>
+                          <span style={{ color: '#fca5a5', fontWeight: 'bold' }}>{phys.vLimitKmh} km/h</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>{t('physics_drag')} (Fluid Drag)</span>
+                          <span style={{ color: '#f472b6' }}>{phys.fd} N</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </>
+            ) : (
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                {t('cal_routing')}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="map-overlay-widget" style={{ border: '1.5px dashed #38bdf8', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}>
+            <div className="widget-header" style={{ color: '#38bdf8' }}>
+              <Activity size={16} />
+              <span>{lang === 'ko' ? '대피 챌린지 모드 활성화' : 'ໂໝດເກມອົບພະຍົບ'}</span>
             </div>
-          )}
-        </div>
+            <div style={{ padding: '0.5rem 0', fontSize: '0.8rem', lineHeight: 1.4 }}>
+              {lang === 'ko' 
+                ? '폭우 상황 속에서 목적지 대피소까지 직접 차량을 운전하는 중입니다. 침수 구간을 피하고 골든타임 내에 도달하십시오!' 
+                : 'ກຳລັງຂັບຂີ່ລົດຫຼີກລ່ຽງນ້ຳຖ້ວມເພື່ອອົບພະຍົບ. ຫຼີກລ່ຽງທາງນ້ຳຖ້ວມ ແລະ ສິ່ງກີດຂວາງ!'}
+            </div>
+          </div>
+        )}
       </main>
     </div>
 
@@ -1534,6 +2026,386 @@ export default function App() {
                 onMouseEnter={e => e.target.style.opacity='0.85'}
                 onMouseLeave={e => e.target.style.opacity='1'}
               >↑</button>
+            </div>
+          </div>
+        )}
+        
+        {/* ── Booth Game Modals & HUD Overlays ─────────────────── */}
+        
+        {/* 1. 차량 선택 모달 */}
+        {gameShowSelect && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)',
+            display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+          }}>
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.95)', border: '2px solid rgba(99, 102, 241, 0.4)',
+              borderRadius: '16px', padding: '2rem', width: '90%', maxWidth: '500px',
+              boxShadow: '0 0 25px rgba(99, 102, 241, 0.4)', color: '#fff', textAlign: 'center'
+            }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#60a5fa' }}>
+                {t('game_select_vehicle')}
+              </h2>
+              <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.5rem', lineHeight: 1.4 }}>
+                {t('game_desc')}
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <button
+                  onClick={() => startGame('tuktuk')}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)',
+                    borderRadius: '12px', padding: '1rem', color: '#fca5a5', cursor: 'pointer',
+                    textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'all 0.2s',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(239, 68, 68, 0.25)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(239, 68, 68, 0.15)'}
+                >
+                  <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>🛺 {t('vehicle_tuktuk')}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{t('game_vehicle_tuktuk_desc')}</span>
+                </button>
+                
+                <button
+                  onClick={() => startGame('motorcycle')}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)',
+                    borderRadius: '12px', padding: '1rem', color: '#93c5fd', cursor: 'pointer',
+                    textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'all 0.2s',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(59, 130, 246, 0.25)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(59, 130, 246, 0.15)'}
+                >
+                  <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>🏍️ {t('vehicle_motorcycle')}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{t('game_vehicle_moto_desc')}</span>
+                </button>
+                
+                <button
+                  onClick={() => startGame('car')}
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)',
+                    borderRadius: '12px', padding: '1rem', color: '#a7f3d0', cursor: 'pointer',
+                    textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.2rem', transition: 'all 0.2s',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(16, 185, 129, 0.25)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(16, 185, 129, 0.15)'}
+                >
+                  <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>🚗 {t('vehicle_car')}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{t('game_vehicle_car_desc')}</span>
+                </button>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setGameShowSelect(false);
+                  playTone(200, 0.1);
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)', border: 'none', borderRadius: '8px',
+                  padding: '0.5rem 1rem', color: '#fff', fontSize: '0.8rem', cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 2. 게임 실패 모달 */}
+        {!isGameMode && !gameWin && (gameHealth <= 0 || gameTimeLeft <= 0) && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+            display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+          }}>
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.95)', border: '2px solid #ef4444',
+              borderRadius: '16px', padding: '2.5rem 2rem', width: '90%', maxWidth: '450px',
+              boxShadow: '0 0 30px rgba(239, 68, 68, 0.5)', color: '#fff', textAlign: 'center'
+            }}>
+              <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>💀</span>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#fca5a5', marginBottom: '1rem' }}>
+                {t('game_over_title')}
+              </h2>
+              <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '2rem', lineHeight: 1.4 }}>
+                {t('game_over_desc')}
+              </p>
+              
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setGameShowSelect(true)}
+                  style={{
+                    background: 'linear-gradient(135deg, #ef4444, #dc2626)', border: 'none',
+                    borderRadius: '10px', padding: '0.75rem 1.5rem', color: '#fff',
+                    fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  {t('game_restart_btn')}
+                </button>
+                <button
+                  onClick={() => {
+                    setGameHealth(100);
+                    setGameTimeLeft(60);
+                    setGameScore(0);
+                    playTone(200, 0.1);
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)', border: 'none',
+                    borderRadius: '10px', padding: '0.75rem 1.5rem', color: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {t('game_exit_btn')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3. 게임 성공 및 명예의 전당 등록 모달 */}
+        {gameWin && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(10px)',
+            display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+          }}>
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.98)', border: '2px solid #10b981',
+              borderRadius: '16px', padding: '2.5rem 2rem', width: '90%', maxWidth: '450px',
+              boxShadow: '0 0 35px rgba(16, 185, 129, 0.5)', color: '#fff', textAlign: 'center'
+            }}>
+              <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>🏆</span>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#a7f3d0', marginBottom: '0.75rem' }}>
+                {t('game_clear_title')}
+              </h2>
+              <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.5rem' }}>
+                {t('game_clear_desc')}
+              </p>
+              
+              <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{t('game_final_score')}</div>
+                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: '#34d399', textShadow: '0 0 10px rgba(52,211,153,0.4)' }}>
+                  {gameScore}
+                </div>
+              </div>
+              
+              {/* 명예의 전당 등록 양식 */}
+              {!gameRankRegistered ? (
+                <div style={{ marginBottom: '2rem' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginBottom: '0.5rem' }}>
+                    {t('game_enter_name')}
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      value={gameNameInput}
+                      onChange={e => setGameNameInput(e.target.value)}
+                      placeholder="Name"
+                      maxLength={10}
+                      style={{
+                        flex: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(52,211,153,0.3)',
+                        borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#fff', outline: 'none'
+                      }}
+                    />
+                    <button
+                      onClick={registerHighScore}
+                      style={{
+                        background: '#10b981', border: 'none', borderRadius: '8px',
+                        padding: '0.5rem 1.25rem', color: '#fff', fontWeight: 'bold', cursor: 'pointer'
+                      }}
+                    >
+                      {t('game_rank_register')}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ color: '#34d399', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                  ✓ {t('game_rank_msg')}
+                </p>
+              )}
+              
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                <button
+                  onClick={() => startGame(gameVehicle)}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none',
+                    borderRadius: '10px', padding: '0.75rem 1.5rem', color: '#fff',
+                    fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  {t('game_restart_btn')}
+                </button>
+                <button
+                  onClick={() => {
+                    setGameWin(false);
+                    setGameHealth(100);
+                    setGameTimeLeft(60);
+                    setGameScore(0);
+                    playTone(200, 0.1);
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)', border: 'none',
+                    borderRadius: '10px', padding: '0.75rem 1.5rem', color: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {t('game_exit_btn')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. 게임 중 HUD 패널 (Floating Panel) */}
+        {isGameMode && (
+          <div style={{
+            position: 'fixed', top: '80px', right: '20px', width: '320px',
+            background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '16px',
+            padding: '1.25rem', color: '#fff', zIndex: 900,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '1rem'
+          }}>
+            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#38bdf8' }}>
+                {lang === 'ko' ? '🎮 대피 서바이벌 HUD' : '🎮 ສະຖານະເກມ'}
+              </h3>
+              <span style={{ fontSize: '0.75rem', background: 'rgba(99,102,241,0.2)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.4)' }}>
+                {gameVehicle === 'tuktuk' ? '🛺 Tuktuk' : (gameVehicle === 'motorcycle' ? '🏍️ Moto' : '🚗 Car')}
+              </span>
+            </div>
+            
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                <span>{t('game_health')}</span>
+                <span style={{ fontWeight: 'bold', color: gameHealth > 40 ? '#10b981' : '#ef4444' }}>{gameHealth}%</span>
+              </div>
+              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+                <div style={{ width: `${gameHealth}%`, height: '100%', background: gameHealth > 40 ? 'linear-gradient(90deg, #10b981, #34d399)' : 'linear-gradient(90deg, #ef4444, #f87171)', transition: 'width 0.2s' }} />
+              </div>
+            </div>
+            
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                <span>{t('game_time')}</span>
+                <span style={{ fontWeight: 'bold', color: gameTimeLeft > 20 ? '#f59e0b' : '#ef4444' }}>{gameTimeLeft}s</span>
+              </div>
+              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+                <div style={{ width: `${(gameTimeLeft / 60) * 100}%`, height: '100%', background: gameTimeLeft > 20 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' : 'linear-gradient(90deg, #ef4444, #f87171)', transition: 'width 1s linear' }} />
+              </div>
+            </div>
+            
+            <div style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div>📍 {t('game_current_pos')}: <strong style={{ color: '#38bdf8' }}>{gamePlayerNode}</strong> ({getNodeLabel(gamePlayerNode)})</div>
+              <div>🏁 {t('game_target_pos')}: <strong style={{ color: '#10b981' }}>{gameTargetNode}</strong> ({getNodeLabel(gameTargetNode)})</div>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+              <button
+                onClick={() => handleGameMove('UP')}
+                style={{
+                  width: '40px', height: '40px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '8px', color: '#fff', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'
+                }}
+              >▲</button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => handleGameMove('LEFT')}
+                  style={{
+                    width: '40px', height: '40px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '8px', color: '#fff', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'
+                  }}
+                >◀</button>
+                <button
+                  onClick={() => handleGameMove('DOWN')}
+                  style={{
+                    width: '40px', height: '40px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '8px', color: '#fff', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'
+                  }}
+                >▼</button>
+                <button
+                  onClick={() => handleGameMove('RIGHT')}
+                  style={{
+                    width: '40px', height: '40px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '8px', color: '#fff', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'
+                  }}
+                >▶</button>
+              </div>
+              <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                * W/A/S/D 또는 키보드 방향키 조작 가능
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.7rem' }}>
+              <div style={{ fontWeight: 'bold', color: '#818cf8', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <Activity size={12} /> {t('physics_oracle_title')}
+              </div>
+              <div style={{ opacity: 0.9, lineHeight: 1.3 }}>
+                {(() => {
+                  const adj = getAdjacencyList();
+                  const neighbors = adj[gamePlayerNode] || [];
+                  let depth = 0;
+                  let isMud = false;
+                  neighbors.forEach(n => {
+                    if (telemetry && telemetry[n.telemetry_id]) {
+                      const d = telemetry[n.telemetry_id].water_depth_m || 0;
+                      if (d > depth) {
+                        depth = d;
+                        isMud = n.surface === 'unpaved';
+                      }
+                    }
+                  });
+                  
+                  const limits = { tuktuk: 0.15, motorcycle: 0.22, car: 0.40 };
+                  const limit = limits[gameVehicle] || 0.40;
+                  
+                  if (depth >= limit) {
+                    return lang === 'ko' 
+                      ? `위험: 침수 깊이 ${depth}m가 차량 한계치(${limit}m)를 초과! 바퀴가 잠겨 수직항력이 급감하고 마찰이 상실되었습니다.` 
+                      : `ອັນຕະລາຍ: ລະດັບນ້ຳຖ້ວມ ${depth}m ກາຍຂີດຈຳກັດພາຫະນະ (${limit}m)! ແຮງຍຶດເກາະເສຍໄປແລ້ວ.`;
+                  } else if (isMud) {
+                    return lang === 'ko'
+                      ? `진흙 늪: 타이어 구름 저항이 250% 폭증하고 마찰 계수(μ)가 0.15로 급락하여 시간 감점 페널티(-2s)가 누적됩니다.`
+                      : `ທາງຕົມ: ແຮງຮຸກຖູຫຼຸດລົງເຫຼືອ (μ ≈ 0.15) ເຮັດໃຫ້ລົດຕິດຫຼົ່ມ ແລະ ຖືກຫຼຸດເວລາລົງ (-2s).`;
+                  } else if (depth > 0.02) {
+                    return lang === 'ko'
+                      ? `물웅덩이: 수위 ${depth}m. 아르키메데스 부력(Fb)으로 인해 접지 마찰력이 미세하게 손실되는 중입니다.`
+                      : `ມີນ້ຳຂັງ: ລະດັບນ້ຳ ${depth}m. ໄດ້ຮັບແຮງຟູ (Fb) ເຮັດໃຫ້ແແຮງຍຶດເກາະຫຼຸດລົງໜ້ອຍໜຶ່ງ.`;
+                  } else {
+                    return lang === 'ko'
+                      ? `양호: 포장도로 표면 접지 계수(μ ≈ 0.65) 안정적. 관성 운동에 의한 조향 제어가 양호하게 유지됩니다.`
+                      : `ປົກກະຕິ: ແຮງຍຶດເກາະລະຫວ່າງຢາງລົດແລະໜ້າທາງ (μ ≈ 0.65) ຍັງຄົງທີ່, ການຄວບຄຸມລົດດີ.`;
+                  }
+                })()}
+              </div>
+            </div>
+            
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '0.5rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#fbbf24', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.2rem', marginBottom: '0.3rem', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{t('game_leaderboard_title')}</span>
+                <span>Top 3</span>
+              </div>
+              <table style={{ width: '100%', fontSize: '0.68rem', textAlign: 'left', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ color: '#94a3b8' }}>
+                    <th>{t('game_rank')}</th>
+                    <th>{t('game_name')}</th>
+                    <th>{t('game_vehicle')}</th>
+                    <th>{t('game_score')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gameLeaderboard.slice(0, 3).map((entry, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <td style={{ fontWeight: 'bold', color: idx===0 ? '#fbbf24' : (idx===1 ? '#94a3b8' : '#cd7f32') }}>{idx+1}</td>
+                      <td>{entry.name}</td>
+                      <td>{entry.vehicle === 'tuktuk' ? '🛺' : (entry.vehicle === 'motorcycle' ? '🏍️' : '🚗')}</td>
+                      <td style={{ fontWeight: 'bold', color: '#34d399' }}>{entry.score}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
