@@ -1262,21 +1262,7 @@ export default function App() {
                 playTone(600, 0.1);
               }
             }}
-            style={{
-              background: isGameMode ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-              border: isGameMode ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(16, 185, 129, 0.5)',
-              color: isGameMode ? '#fca5a5' : '#a7f3d0',
-              borderRadius: '8px',
-              padding: '0.3rem 0.6rem',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              transition: 'all 0.2s',
-              boxShadow: isGameMode ? '0 0 8px rgba(239,68,68,0.3)' : '0 0 8px rgba(16,185,129,0.3)'
-            }}
+            className={`game-toggle-btn ${isGameMode ? 'active' : 'inactive'}`}
           >
             {isGameMode ? t('game_exit_btn') : t('game_btn')}
           </button>
@@ -1422,25 +1408,13 @@ export default function App() {
               onClick={() => {
                 setIsEvacMode(!isEvacMode);
               }}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: 'none',
-                borderRadius: '10px',
-                fontWeight: 'bold',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                color: '#fff',
-                background: isEvacMode 
-                  ? 'linear-gradient(135deg, #10b981, #059669)'
-                  : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                boxShadow: isEvacMode ? '0 0 10px rgba(16,185,129,0.3)' : '0 0 10px rgba(239,68,68,0.3)',
-                animation: !isEvacMode && (rainIntensity >= 50 || riverLevel >= 11.5) ? 'pulse 1.5s infinite' : 'none'
-              }}
+              className={`evac-toggle-btn ${
+                isEvacMode 
+                  ? 'evac-on' 
+                  : (rainIntensity >= 50 || riverLevel >= 11.5) 
+                    ? 'evac-off danger-alert' 
+                    : 'evac-off normal'
+              }`}
             >
               {isEvacMode ? (
                 <>
@@ -1496,28 +1470,33 @@ export default function App() {
               Object.entries(telemetry).map(([id, info]) => {
                 let badgeClass = 'status-dry';
                 let statusName = t('road_dry');
+                let dotClass = 'safe';
                 if (info.status === 'PASSABLE_CAUTION') {
                   badgeClass = 'status-caution';
                   statusName = t('road_caution');
+                  dotClass = 'warning';
                 }
                 if (info.status === 'WARNING_MOTO_RESTRICTED') {
                   badgeClass = 'status-caution';
                   statusName = t('road_restrict');
+                  dotClass = 'warning';
                 }
                 if (info.status === 'FLOODED_IMPASSABLE') {
                   badgeClass = 'status-danger';
                   statusName = t('road_flooded');
+                  dotClass = 'danger';
                 }
                 
                 return (
                   <div key={id} className="telemetry-item">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                      <span style={{ fontWeight: '600' }}>{info.name}</span>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, paddingRight: '0.5rem' }}>
+                      <span style={{ fontWeight: '600', fontSize: '0.82rem', color: '#f1f5f9' }}>{info.name}</span>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
                         {t('elevation_m')}: {info.elevation}m | {t('depth_m')}: {info.water_depth_m.toFixed(2)}m
                       </span>
                     </div>
-                    <span className={`status-badge ${badgeClass}`}>
+                    <span className={`status-badge ${badgeClass}`} style={{ flexShrink: 0 }}>
+                      <span className={`status-dot ${dotClass}`} />
                       {statusName}
                     </span>
                   </div>
