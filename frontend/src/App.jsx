@@ -1562,48 +1562,51 @@ export default function App() {
             const hazardOnNode = getNodeHazard(id);
             
             // Determine marker size and styling
-            let radius = 7;
+            let radius = 8;
             let markerColor = 'var(--accent-blue)';
             let strokeColor = '#ffffff';
-            let strokeWidth = 1.5;
+            let strokeWidth = 2.0;
             
             if (isStart) {
               markerColor = 'var(--status-safe)';
-              radius = 10;
+              radius = 14;
+              strokeWidth = 2.5;
             } else if (isEnd && !isEvacMode) {
               markerColor = '#a855f7'; // Purple
-              radius = 10;
+              radius = 14;
+              strokeWidth = 2.5;
             } else if (isShelterNode) {
               markerColor = '#10b981'; // Green for shelters
-              radius = 9;
+              radius = 15;
               strokeColor = '#ffffff';
-              strokeWidth = 2.5; // Bold outline
+              strokeWidth = 3.0; // Bold outline
             }
             
             // Overrides for game mode
             if (isGameMode) {
               if (id === gamePlayerNode) {
                 markerColor = '#38bdf8'; // Glowing blue for player
-                radius = 12;
+                radius = 16;
                 strokeColor = '#e0f2fe';
-                strokeWidth = 3;
+                strokeWidth = 4.0;
               } else if (id === gameTargetNode) {
                 markerColor = '#22c55e'; // Bright green for shelter target
-                radius = 12;
+                radius = 16;
                 strokeColor = '#fef08a'; // Yellow outline
-                strokeWidth = 3.5;
+                strokeWidth = 4.5;
               } else {
                 markerColor = 'rgba(148, 163, 184, 0.4)';
-                radius = 5.5;
-                strokeColor = 'rgba(255,255,255,0.2)';
-                strokeWidth = 1;
+                radius = 7.0;
+                strokeColor = 'rgba(255,255,255,0.35)';
+                strokeWidth = 1.2;
               }
             }
             
             // Overrides for hazard nodes
             if (hazardOnNode) {
               markerColor = '#f97316'; // Orange warning
-              radius = isStart || isEnd ? 10 : 8;
+              radius = isStart || isEnd ? 14 : 10;
+              strokeWidth = 2.0;
             }
 
             return (
@@ -1727,7 +1730,7 @@ export default function App() {
               positions={routeData.geojson.geometry.coordinates.map(pt => [pt[1], pt[0]])}
               pathOptions={{
                 color: getRouteColor(),
-                weight: 5,
+                weight: 8,
                 opacity: 0.85,
                 dashArray: '10, 5' // dashed line showing directionality
               }}
@@ -1803,12 +1806,12 @@ export default function App() {
                   }
                   
                   return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'rgba(255,255,255,0.02)', padding: '0.5rem 0.6rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-                        <span style={{ color: '#94a3b8', fontWeight: '600' }}>{t('safety_index')}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: '#cbd5e1', fontWeight: '600' }}>{t('safety_index')}</span>
                         <span style={{ fontWeight: 'bold', color: safetyColor }}>{safetyLabel}</span>
                       </div>
-                      <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '9px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
                         <div style={{ width: `${safetyPct}%`, height: '100%', background: safetyColor, transition: 'width 0.3s' }} />
                       </div>
                     </div>
@@ -1830,12 +1833,12 @@ export default function App() {
                   }
                   
                   return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'rgba(255,255,255,0.02)', padding: '0.5rem 0.6rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-                        <span style={{ color: '#94a3b8' }}>{t('max_water')}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: '#cbd5e1' }}>{t('max_water')}</span>
                         <span style={{ fontWeight: 'bold', color: barColor }}>{maxDepth.toFixed(3)} m / {limit} m</span>
                       </div>
-                      <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '9px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
                         <div style={{ width: `${ratio}%`, height: '100%', background: barColor, transition: 'width 0.3s' }} />
                       </div>
                     </div>
@@ -1887,11 +1890,11 @@ export default function App() {
                           <div style={{ fontWeight: 'bold', color: '#f472b6', fontSize: '0.78rem' }}>{phys.fd} N</div>
                         </div>
                         <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.5rem', borderRadius: '6px', gridColumn: 'span 2', border: '1px solid rgba(255,255,255,0.02)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.62rem', marginBottom: '0.15rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1', fontSize: '0.8rem', marginBottom: '0.15rem' }}>
                             <span>{t('physics_grip')}</span>
                             <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444') }}>{phys.gripRemaining}%</span>
                           </div>
-                          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                          <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
                             <div style={{ width: `${phys.gripRemaining}%`, height: '100%', background: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444'), transition: 'width 0.3s' }} />
                           </div>
                         </div>
@@ -2299,37 +2302,37 @@ export default function App() {
         {/* 4. 게임 중 HUD 패널 (Floating Panel) */}
         {isGameMode && (
           <div style={{
-            position: 'fixed', top: '80px', right: '20px', width: '320px',
+            position: 'fixed', top: '80px', right: '20px', width: '360px',
             background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '16px',
+            border: '1px solid rgba(99, 102, 241, 0.4)', borderRadius: '16px',
             padding: '1.25rem', color: '#fff', zIndex: 900,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '1rem'
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '1.1rem'
           }}>
             <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#38bdf8' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#38bdf8' }}>
                 {lang === 'ko' ? '🎮 대피 서바이벌 HUD' : '🎮 ສະຖານະເກມ'}
               </h3>
-              <span style={{ fontSize: '0.75rem', background: 'rgba(99,102,241,0.2)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.4)' }}>
+              <span style={{ fontSize: '0.85rem', background: 'rgba(99,102,241,0.2)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.4)' }}>
                 {gameVehicle === 'tuktuk' ? '🛺 Tuktuk' : (gameVehicle === 'motorcycle' ? '🏍️ Moto' : '🚗 Car')}
               </span>
             </div>
             
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
                 <span>{t('game_health')}</span>
                 <span style={{ fontWeight: 'bold', color: gameHealth > 40 ? '#10b981' : '#ef4444' }}>{gameHealth}%</span>
               </div>
-              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '11px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
                 <div style={{ width: `${gameHealth}%`, height: '100%', background: gameHealth > 40 ? 'linear-gradient(90deg, #10b981, #34d399)' : 'linear-gradient(90deg, #ef4444, #f87171)', transition: 'width 0.2s' }} />
               </div>
             </div>
             
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
                 <span>{t('game_time')}</span>
                 <span style={{ fontWeight: 'bold', color: gameTimeLeft > 20 ? '#f59e0b' : '#ef4444' }}>{gameTimeLeft}s</span>
               </div>
-              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '11px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
                 <div style={{ width: `${(gameTimeLeft / 60) * 100}%`, height: '100%', background: gameTimeLeft > 20 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' : 'linear-gradient(90deg, #ef4444, #f87171)', transition: 'width 1s linear' }} />
               </div>
             </div>
