@@ -1189,25 +1189,109 @@ export default function App() {
         style={{
           background: weatherAlert.color,
           color: '#fff',
-          padding: '0.65rem 1rem',
-          textAlign: 'center',
+          padding: '0.65rem 1.5rem',
           fontWeight: 'bold',
           fontSize: '0.88rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '0.15rem',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           zIndex: 100,
           borderBottom: '1px solid rgba(255,255,255,0.1)'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-          {weatherAlert.level === 'CRITICAL' && <Siren size={18} className="flooded-pulse" />}
-          <span>{weatherAlert.title}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.15rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {weatherAlert.level === 'CRITICAL' && <Siren size={18} className="flooded-pulse" />}
+            <span>{weatherAlert.title}</span>
+          </div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 'normal', opacity: 0.9, textAlign: 'left' }}>
+            {weatherAlert.msg}
+          </div>
         </div>
-        <div style={{ fontSize: '0.75rem', fontWeight: 'normal', opacity: 0.9 }}>
-          {weatherAlert.msg}
-        </div>
+
+        {/* Real-time Physics Dynamics HUD at the top right */}
+        {!isGameMode && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.25rem',
+            background: 'rgba(0, 0, 0, 0.4)',
+            padding: '0.45rem 1rem',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.15)',
+            fontSize: '0.8rem',
+            animation: 'chatSlideUp 0.3s ease'
+          }}>
+            {(() => {
+              const activeRoute = !!routeData;
+              const currentVehicle = routeData ? routeData.vehicle : vehicle;
+              const maxDepth = routeData ? (routeData.geojson?.properties?.max_water_depth || 0) : 0;
+              const phys = calculatePhysics(currentVehicle, maxDepth);
+              const badgeText = activeRoute 
+                ? (lang === 'ko' ? '실시간 분석' : 'ACTIVE') 
+                : (lang === 'ko' ? '경로 대기중' : 'STANDBY');
+              const badgeColor = activeRoute ? '#10b981' : '#94a3b8';
+              const vehicleLabel = getVehicleKorean(currentVehicle);
+              return (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ 
+                      fontSize: '0.65rem', 
+                      background: activeRoute ? 'rgba(16, 185, 129, 0.2)' : 'rgba(148, 163, 184, 0.2)', 
+                      color: badgeColor, 
+                      padding: '0.1rem 0.4rem', 
+                      borderRadius: '4px',
+                      border: `1px solid ${activeRoute ? 'rgba(16, 185, 129, 0.4)' : 'rgba(148, 163, 184, 0.3)'}`,
+                      marginRight: '0.25rem',
+                      fontWeight: 'bold'
+                    }}>
+                      {badgeText}
+                    </span>
+                    <span style={{ fontSize: '0.9rem', marginRight: '0.15rem' }}>
+                      {currentVehicle === 'tuktuk' ? '🛺' : (currentVehicle === 'motorcycle' ? '🏍️' : '🚗')}
+                    </span>
+                    <span style={{ color: '#cbd5e1', fontWeight: '500', marginRight: '0.3rem' }}>
+                      {vehicleLabel}:
+                    </span>
+                  </div>
+                  
+                  {/* Buoyancy */}
+                  <div>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem', marginRight: '0.2rem' }}>{t('physics_buoyancy')}</span>
+                    <strong style={{ color: '#60a5fa' }}>{phys.fb} N</strong>
+                  </div>
+
+                  <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.2)' }} />
+
+                  {/* Drag */}
+                  <div>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem', marginRight: '0.2rem' }}>{t('physics_drag')}</span>
+                    <strong style={{ color: '#f472b6' }}>{phys.fd} N</strong>
+                  </div>
+
+                  <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.2)' }} />
+
+                  {/* Grip */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>{t('physics_grip')}</span>
+                    <strong style={{ color: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444') }}>
+                      {phys.gripRemaining}%
+                    </strong>
+                  </div>
+
+                  <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.2)' }} />
+
+                  {/* Speed Limit */}
+                  <div>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem', marginRight: '0.2rem' }}>{t('physics_vlimit')}</span>
+                    <strong style={{ color: '#fca5a5' }}>{phys.vLimitKmh} km/h</strong>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
       </div>
 
       <div className="app-container" style={{ flexGrow: 1, height: 'calc(100vh - 55px)' }}>
@@ -1887,60 +1971,7 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* 실시간 물리 역학 시뮬레이션 데이터 분석 대시보드 */}
-                {(() => {
-                  const maxDepth = routeData.geojson?.properties?.max_water_depth || 0;
-                  const phys = calculatePhysics(routeData.vehicle, maxDepth);
-                  return (
-                    <div style={{
-                      padding: '0.6rem',
-                      background: 'rgba(99, 102, 241, 0.03)',
-                      border: '1px solid rgba(99, 102, 241, 0.15)',
-                      borderRadius: '12px',
-                      fontSize: '0.7rem'
-                    }}>
-                      <div style={{
-                        fontWeight: 'bold',
-                        color: '#818cf8',
-                        marginBottom: '0.4rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        borderBottom: '1px solid rgba(99, 102, 241, 0.15)',
-                        paddingBottom: '0.25rem'
-                      }}>
-                        <Activity size={12} />
-                        <span>{t('physics_title')}</span>
-                      </div>
-                      
-                      {/* 물리 지표 2x2 Grid 배치 */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
-                          <div style={{ color: '#94a3b8', fontSize: '0.62rem', marginBottom: '0.1rem' }}>{t('physics_buoyancy')}</div>
-                          <div style={{ fontWeight: 'bold', color: '#60a5fa', fontSize: '0.78rem' }}>{phys.fb} N</div>
-                        </div>
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
-                          <div style={{ color: '#94a3b8', fontSize: '0.62rem', marginBottom: '0.1rem' }}>{t('physics_drag')}</div>
-                          <div style={{ fontWeight: 'bold', color: '#f472b6', fontSize: '0.78rem' }}>{phys.fd} N</div>
-                        </div>
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.5rem', borderRadius: '6px', gridColumn: 'span 2', border: '1px solid rgba(255,255,255,0.02)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1', fontSize: '0.8rem', marginBottom: '0.15rem' }}>
-                            <span>{t('physics_grip')}</span>
-                            <span style={{ fontWeight: 'bold', color: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444') }}>{phys.gripRemaining}%</span>
-                          </div>
-                          <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
-                            <div style={{ width: `${phys.gripRemaining}%`, height: '100%', background: phys.gripRemaining > 70 ? '#10b981' : (phys.gripRemaining > 40 ? '#eab308' : '#ef4444'), transition: 'width 0.3s' }} />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
-                        <span>{t('physics_vlimit')}</span>
-                        <span style={{ color: '#fca5a5', fontWeight: 'bold', fontSize: '0.78rem' }}>{phys.vLimitKmh} km/h</span>
-                      </div>
-                    </div>
-                  );
-                })()}
+
               </>
             ) : (
               <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
