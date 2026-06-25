@@ -7,6 +7,8 @@
   --border-glow: rgba(59, 130, 246, 0.15);
   --accent-blue: #3b82f6;
   --accent-blue-glow: rgba(59, 130, 246, 0.45);
+  --accent-cyan: #00f2fe;
+  --accent-cyan-glow: rgba(0, 242, 254, 0.45);
   
   --color-text-main: #f1f5f9;
   --color-text-muted: #cbd5e1;
@@ -638,4 +640,155 @@ body {
 
 .panel-toggle-btn:active {
   transform: scale(0.95);
+}
+
+/* ── Cybernetic Hologram UI Revamp ──────────────────────── */
+
+/* Overriding sidebar & widget with hologram skin */
+.sidebar, .map-overlay-widget {
+  background: rgba(10, 15, 30, 0.85) !important;
+  border: 1px solid rgba(0, 242, 254, 0.25) !important;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.15), inset 0 0 15px rgba(0, 242, 254, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scanline overlay for cyber terminal effect */
+.sidebar::before, .map-overlay-widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.15) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.3;
+}
+
+/* Animated Flowing Route Line on Map */
+.animated-route-line {
+  stroke-dasharray: 15, 12;
+  animation: route-flow-anim 1.5s infinite linear;
+  filter: drop-shadow(0 0 6px var(--accent-cyan));
+}
+
+@keyframes route-flow-anim {
+  from {
+    stroke-dashoffset: 27;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Rain Particle Overlay */
+.rain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  background: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='10' y1='0' x2='8' y2='100' stroke='rgba(0, 242, 254, 0.35)' stroke-width='0.5'/%3E%3Cline x1='40' y1='0' x2='37' y2='100' stroke='rgba(0, 242, 254, 0.3)' stroke-width='0.4'/%3E%3Cline x1='70' y1='0' x2='68' y2='100' stroke='rgba(0, 242, 254, 0.35)' stroke-width='0.5'/%3E%3Cline x1='90' y1='0' x2='87' y2='100' stroke='rgba(0, 242, 254, 0.25)' stroke-width='0.3'/%3E%3C/svg%3E");
+  background-size: 200px 400px;
+  animation: rain-fall-anim 0.8s infinite linear;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes rain-fall-anim {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: -20px 400px;
+  }
+}
+
+/* Telemetry Details & Terminal Styling */
+.telemetry-details {
+  border: 1px solid rgba(0, 242, 254, 0.2) !important;
+  background: rgba(10, 15, 30, 0.5) !important;
+  border-radius: 18px;
+  padding: 1.25rem !important;
+  margin-top: 0.5rem;
+}
+
+.telemetry-summary {
+  font-family: 'Courier New', monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-shadow: 0 0 6px rgba(0, 242, 254, 0.4);
+  outline: none;
+}
+
+.telemetry-summary::-webkit-details-marker {
+  display: none;
+}
+
+.telemetry-summary::after {
+  content: '▶';
+  font-size: 0.75rem;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--accent-cyan);
+}
+
+details[open] .telemetry-summary::after {
+  transform: rotate(90deg);
+}
+
+.telemetry-terminal {
+  font-family: 'Courier New', Courier, monospace;
+  background: rgba(5, 8, 15, 0.95) !important;
+  border: 1px solid rgba(0, 242, 254, 0.2) !important;
+  padding: 0.75rem;
+  border-radius: 12px;
+  max-height: 180px;
+  overflow-y: auto;
+  color: #4ade80 !important;
+  box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.15);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin-top: 0.75rem;
+}
+
+/* Customize scrollbar inside terminal */
+.telemetry-terminal::-webkit-scrollbar {
+  width: 4px;
+}
+.telemetry-terminal::-webkit-scrollbar-thumb {
+  background: rgba(0, 242, 254, 0.3);
+  border-radius: 2px;
+}
+
+.telemetry-terminal-line {
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.telemetry-terminal-line.danger {
+  color: var(--status-danger) !important;
+  text-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+}
+
+.telemetry-terminal-line.warning {
+  color: var(--status-warning) !important;
+  text-shadow: 0 0 4px rgba(245, 158, 11, 0.3);
+}
+
+.telemetry-terminal-line.safe {
+  color: var(--status-safe) !important;
+  text-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
 }

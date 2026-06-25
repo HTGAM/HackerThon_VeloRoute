@@ -1183,6 +1183,10 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      {/* Rain Particle Overlay */}
+      {rainIntensity > 0 && (
+        <div className="rain-overlay" style={{ opacity: Math.min(0.85, rainIntensity / 100) }} />
+      )}
       {/* Weather Alert Notification Banner */}
       <div 
         className={`weather-banner ${weatherAlert.class}`} 
@@ -1320,7 +1324,6 @@ export default function App() {
             />
           </div>
         </div>
-
         {/* Route Setting Form */}
         <div className="control-card">
           <div className="card-title">
@@ -1408,19 +1411,14 @@ export default function App() {
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Emergency Evacuation & Community Actions */}
-        <div className="control-card">
-          <div className="card-title">
-            <Shield size={18} style={{ color: isEvacMode ? '#ef4444' : '#10b981' }} />
-            <h2>{t('disaster_center')}</h2>
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {/* Combined Operations Panel */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.9rem', marginTop: '0.25rem' }}>
             <button
               onClick={() => {
-                setIsEvacMode(!isEvacMode);
+                const newEvac = !isEvacMode;
+                setIsEvacMode(newEvac);
+                playTone(newEvac ? 880 : 440, 0.15, newEvac ? 'sawtooth' : 'sine');
               }}
               className={`evac-toggle-btn ${
                 isEvacMode 
@@ -1433,12 +1431,12 @@ export default function App() {
               {isEvacMode ? (
                 <>
                   <Navigation size={16} />
-                  {t('btn_normal_mode')}
+                  <span>{t('btn_normal_mode')}</span>
                 </>
               ) : (
                 <>
                   <Siren size={16} className="flooded-pulse" />
-                  {t('btn_evac_mode')}
+                  <span>{t('btn_evac_mode')}</span>
                 </>
               )}
             </button>
@@ -1465,64 +1463,51 @@ export default function App() {
                 onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
                 onMouseOut={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
               >
-                <Trash2 size={14} />
+                <Trash2 size={13} />
                 {t('btn_clear_hazards')} ({hazards.length})
               </button>
             )}
           </div>
         </div>
 
-        {/* Real-time telemetry Segment Status Feed */}
-        <div className="control-card" style={{ flexGrow: 1 }}>
-          <div className="card-title">
-            <Droplets size={18} />
-            <h2>{t('road_status_title')}</h2>
-          </div>
+        {/* Collapsible Cyber Telemetry Terminal */}
+        <details className="telemetry-details">
+          <summary className="telemetry-summary">
+            <span>[+] SYSTEM TELEMETRY STREAM</span>
+          </summary>
           
-          <div className="telemetry-list">
+          <div className="telemetry-terminal">
             {telemetry ? (
               Object.entries(telemetry).map(([id, info]) => {
-                let badgeClass = 'status-dry';
-                let statusName = t('road_dry');
-                let dotClass = 'safe';
+                let logClass = 'safe';
+                let statusName = `[DRY] depth: 0.00m`;
                 if (info.status === 'PASSABLE_CAUTION') {
-                  badgeClass = 'status-caution';
-                  statusName = t('road_caution');
-                  dotClass = 'warning';
+                  logClass = 'warning';
+                  statusName = `[CAUTION] depth: ${info.water_depth_m.toFixed(2)}m`;
                 }
                 if (info.status === 'WARNING_MOTO_RESTRICTED') {
-                  badgeClass = 'status-caution';
-                  statusName = t('road_restrict');
-                  dotClass = 'warning';
+                  logClass = 'warning';
+                  statusName = `[RESTRICTED] depth: ${info.water_depth_m.toFixed(2)}m`;
                 }
                 if (info.status === 'FLOODED_IMPASSABLE') {
-                  badgeClass = 'status-danger';
-                  statusName = t('road_flooded');
-                  dotClass = 'danger';
+                  logClass = 'danger';
+                  statusName = `[IMPASSABLE] depth: ${info.water_depth_m.toFixed(2)}m`;
                 }
                 
                 return (
-                  <div key={id} className="telemetry-item">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, paddingRight: '0.5rem' }}>
-                      <span style={{ fontWeight: '600', fontSize: '0.82rem', color: '#f1f5f9' }}>{info.name}</span>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
-                        {t('elevation_m')}: {info.elevation}m | {t('depth_m')}: {info.water_depth_m.toFixed(2)}m
-                      </span>
-                    </div>
-                    <span className={`status-badge ${badgeClass}`} style={{ flexShrink: 0 }}>
-                      <span className={`status-dot ${dotClass}`} />
-                      {statusName}
-                    </span>
+                  <div key={id} className={`telemetry-terminal-line ${logClass}`}>
+                    &gt; {info.name}: {statusName} (elev: {info.elevation}m)
                   </div>
                 );
               })
             ) : (
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'center', padding: '1rem' }}>
-                {t('sensor_connecting')}
+              <div style={{ color: 'var(--accent-cyan)' }}>
+                &gt; CONNECTING TO SENSOR NETWORK NODE...
               </div>
             )}
           </div>
-        </div>
+        </details>
+
       </aside>
 
       {/* Main Map Content */}
@@ -1777,11 +1762,11 @@ export default function App() {
           {!isGameMode && routeData && routeData.geojson && (
             <Polyline
               positions={routeData.geojson.geometry.coordinates.map(pt => [pt[1], pt[0]])}
+              className="animated-route-line"
               pathOptions={{
                 color: getRouteColor(),
                 weight: 8,
-                opacity: 0.85,
-                dashArray: '10, 5' // dashed line showing directionality
+                opacity: 0.95
               }}
             />
           )}
