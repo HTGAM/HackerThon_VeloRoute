@@ -1183,10 +1183,6 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      {/* Rain Particle Overlay */}
-      {rainIntensity > 0 && (
-        <div className="rain-overlay" style={{ opacity: Math.min(0.85, rainIntensity / 100) }} />
-      )}
       {/* Weather Alert Notification Banner */}
       <div 
         className={`weather-banner ${weatherAlert.class}`} 
@@ -1512,6 +1508,10 @@ export default function App() {
 
       {/* Main Map Content */}
       <main className={`map-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        {/* Radar scope & scan animation */}
+        <div className="radar-grid" />
+        <div className="radar-sweep" />
+
         {/* Panel Toggle Buttons */}
         <button
           onClick={() => {

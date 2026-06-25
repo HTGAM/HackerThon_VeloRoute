@@ -686,27 +686,75 @@ body {
   }
 }
 
-/* Rain Particle Overlay */
-.rain-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+/* High-Tech Radar Scanning Scope */
+.radar-grid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1000px;
+  height: 1000px;
+  margin-top: -500px;
+  margin-left: -500px;
+  border: 1px dashed rgba(0, 242, 254, 0.08);
+  border-radius: 50%;
   pointer-events: none;
-  z-index: 9999;
-  background: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cline x1='10' y1='0' x2='8' y2='100' stroke='rgba(0, 242, 254, 0.35)' stroke-width='0.5'/%3E%3Cline x1='40' y1='0' x2='37' y2='100' stroke='rgba(0, 242, 254, 0.3)' stroke-width='0.4'/%3E%3Cline x1='70' y1='0' x2='68' y2='100' stroke='rgba(0, 242, 254, 0.35)' stroke-width='0.5'/%3E%3Cline x1='90' y1='0' x2='87' y2='100' stroke='rgba(0, 242, 254, 0.25)' stroke-width='0.3'/%3E%3C/svg%3E");
-  background-size: 200px 400px;
-  animation: rain-fall-anim 0.8s infinite linear;
-  transition: opacity 0.5s ease;
+  z-index: 900;
+  box-shadow: inset 0 0 80px rgba(0, 242, 254, 0.02);
 }
 
-@keyframes rain-fall-anim {
-  0% {
-    background-position: 0px 0px;
+.radar-grid::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  margin-top: -300px;
+  margin-left: -300px;
+  border: 1px dashed rgba(0, 242, 254, 0.05);
+  border-radius: 50%;
+}
+
+.radar-grid::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin-top: -100px;
+  margin-left: -100px;
+  border: 1px solid rgba(0, 242, 254, 0.04);
+  border-radius: 50%;
+}
+
+.radar-sweep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1000px;
+  height: 1000px;
+  margin-top: -500px;
+  margin-left: -500px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(0, 242, 254, 0.12) 0deg,
+    rgba(0, 242, 254, 0.04) 60deg,
+    rgba(0, 242, 254, 0) 120deg,
+    rgba(0, 242, 254, 0) 360deg
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 901;
+  animation: radar-sweep-spin 8s infinite linear;
+}
+
+@keyframes radar-sweep-spin {
+  from {
+    transform: rotate(0deg);
   }
-  100% {
-    background-position: -20px 400px;
+  to {
+    transform: rotate(360deg);
   }
 }
 
