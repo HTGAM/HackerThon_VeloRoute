@@ -25,17 +25,24 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo [1/3] Launching FastAPI Backend Server on Port 8001...
-start "VeloRoute Backend (8001)" cmd /c "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8001"
+echo [1/3] Starting Python FastAPI Backend on Port 8001...
+:: Launch backend in a separate terminal, install requirements, and run server with reload
+start "VeloRoute Backend (Port 8001)" cmd /k "cd backend && python -m pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
 
-echo [2/3] Launching React Frontend (Vite) Dev Server...
-start "VeloRoute Frontend (Vite)" cmd /c "cd frontend && npm run dev"
+echo [2/3] Starting React Frontend (Vite) on Port 3000...
+:: Launch frontend in a separate terminal, install node packages, and run dev server
+start "VeloRoute Frontend (Port 3000)" cmd /k "cd frontend && npm.cmd install && npm.cmd run dev"
 
-echo [3/3] Waiting for servers to initialize (5 seconds)...
-timeout /t 5 /nobreak > nul
+echo [3/3] Waiting for servers to initialize (6 seconds)...
+timeout /t 6 >nul
+
+echo [OK] Launching default web browser at http://localhost:3000 ...
+start http://localhost:3000
 
 echo.
-echo Startup completed successfully! 
-echo Please keep the spawned command prompt windows open while using the application.
+echo =======================================================================
+echo  Servers are successfully running in the background!
+echo  To stop the application, simply close the spawned terminal windows.
+echo =======================================================================
 echo.
 pause
