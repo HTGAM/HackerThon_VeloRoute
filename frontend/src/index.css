@@ -44,10 +44,9 @@ body {
   width: 100%;
 }
 
-/* Premium App Layout Grid */
+/* Premium App Layout Container */
 .app-container {
-  display: grid;
-  grid-template-columns: 380px 1fr;
+  display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -55,6 +54,8 @@ body {
 
 /* Sidebar Glassmorphic Panel */
 .sidebar {
+  width: 380px;
+  flex-shrink: 0;
   background: var(--bg-secondary);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -66,6 +67,13 @@ body {
   overflow-y: auto;
   z-index: 10;
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.sidebar.collapsed {
+  margin-left: -380px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Title and Logo */
@@ -352,7 +360,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, border-color 0.3s, box-shadow 0.3s;
+}
+
+.map-overlay-widget.collapsed {
+  transform: translateX(calc(100% + 40px));
+  opacity: 0;
+  pointer-events: none;
 }
 
 .map-overlay-widget:hover {
@@ -580,4 +594,34 @@ body {
     box-shadow: inset 0 0 80px rgba(239, 68, 68, 0.75);
     border-color: rgba(239, 68, 68, 0.85);
   }
+}
+
+/* Floating Glassmorphic Toggle Buttons */
+.panel-toggle-btn {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #60a5fa;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(99, 102, 241, 0.1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel-toggle-btn:hover {
+  transform: scale(1.08);
+  border-color: #60a5fa;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(96, 165, 250, 0.4);
+}
+
+.panel-toggle-btn:active {
+  transform: scale(0.95);
 }

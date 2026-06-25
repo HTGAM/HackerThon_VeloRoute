@@ -22,7 +22,9 @@ import {
   AlertCircle,
   Trash2,
   CheckCircle,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 // API Configuration
@@ -207,6 +209,10 @@ const getAdjacencyList = () => {
 
 const TRANSLATIONS = {
   ko: {
+    expand_sidebar: "설정창 열기",
+    collapse_sidebar: "설정창 접기",
+    expand_widget: "경로 안내 열기",
+    collapse_widget: "경로 안내 접기",
     brand_title: "벨로루트 비엔티안",
     brand_subtitle: "스마트시티 실시간 홍수 회피 내비",
     sensor_title: "실시간 메콩강 센서 데이터 (Telemetry)",
@@ -315,6 +321,10 @@ const TRANSLATIONS = {
     game_rank_msg: "랭킹에 기록되었습니다!"
   },
   lo: {
+    expand_sidebar: "ເປີດເມນູຕັ້ງຄ່າ",
+    collapse_sidebar: "ພັບເມນູຕັ້ງຄ່າ",
+    expand_widget: "ເປີດແຜງນຳທາງ",
+    collapse_widget: "ພັບແຜງນຳທາງ",
     brand_title: "ເວໂລຣູດ ວຽງຈັນ",
     brand_subtitle: "ລະບົບນຳທາງຫຼີກລ່ຽງນ້ຳຖ້ວມທັນເວລາ",
     sensor_title: "ຂໍ້ມູນເຊັນເຊີແມ່ນ້ຳຂອງທັນເວລາ",
@@ -493,6 +503,10 @@ export default function App() {
   const [floodZones, setFloodZones] = useState([]);
   const [nodes, setNodes] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Sidebar and widget collapse states
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isWidgetCollapsed, setIsWidgetCollapsed] = useState(false);
 
   // ── AI Chatbot States ──────────────────────────────────────
   const [chatOpen, setChatOpen] = useState(false);
@@ -1196,9 +1210,9 @@ export default function App() {
         </div>
       </div>
 
-      <div className="app-container" style={{ flexGrow: 1, height: 'calc(100vh - 55px)', gridTemplateRows: '1fr', display: 'grid' }}>
+      <div className="app-container" style={{ flexGrow: 1, height: 'calc(100vh - 55px)' }}>
         {/* Sidebar Controls */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="brand-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div className="logo-icon">V</div>
@@ -1513,6 +1527,41 @@ export default function App() {
 
       {/* Main Map Content */}
       <main className="map-container">
+        {/* Panel Toggle Buttons */}
+        <button
+          onClick={() => {
+            setIsSidebarCollapsed(!isSidebarCollapsed);
+            playTone(400, 0.08);
+          }}
+          className="panel-toggle-btn"
+          style={{
+            position: 'absolute',
+            left: '20px',
+            top: '90px',
+            zIndex: 1001,
+          }}
+          title={isSidebarCollapsed ? t('expand_sidebar') : t('collapse_sidebar')}
+        >
+          {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        </button>
+
+        <button
+          onClick={() => {
+            setIsWidgetCollapsed(!isWidgetCollapsed);
+            playTone(400, 0.08);
+          }}
+          className="panel-toggle-btn"
+          style={{
+            position: 'absolute',
+            right: isWidgetCollapsed ? '20px' : '420px',
+            top: '20px',
+            zIndex: 1001,
+          }}
+          title={isWidgetCollapsed ? t('expand_widget') : t('collapse_widget')}
+        >
+          {isWidgetCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+        </button>
+
         {/* Mapbox/Leaflet rendering */}
         <MapContainer 
           center={MAP_CENTER} 
@@ -1741,7 +1790,7 @@ export default function App() {
         {/* Floating Route Status Overlay */}
         {/* Floating Route Status Overlay */}
         {!isGameMode ? (
-          <div className="map-overlay-widget" style={{ border: isEvacMode ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <div className={`map-overlay-widget ${isWidgetCollapsed ? 'collapsed' : ''}`} style={{ border: isEvacMode ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)' }}>
             <div className="widget-header" style={{ color: isEvacMode ? '#ef4444' : '#e2e8f0' }}>
               {isEvacMode ? <Shield size={16} /> : <Navigation2 size={16} />}
               <span>{isEvacMode ? t('feed_title_evac') : t('feed_title_normal')}</span>
@@ -1915,7 +1964,7 @@ export default function App() {
             )}
           </div>
         ) : (
-          <div className="map-overlay-widget" style={{ border: '1.5px dashed #38bdf8', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}>
+          <div className={`map-overlay-widget ${isWidgetCollapsed ? 'collapsed' : ''}`} style={{ border: '1.5px dashed #38bdf8', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}>
             <div className="widget-header" style={{ color: '#38bdf8' }}>
               <Activity size={16} />
               <span>{lang === 'ko' ? '대피 챌린지 모드 활성화' : 'ໂໝດເກມອົບພະຍົບ'}</span>
