@@ -1526,7 +1526,7 @@ export default function App() {
       </aside>
 
       {/* Main Map Content */}
-      <main className="map-container">
+      <main className={`map-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         {/* Panel Toggle Buttons */}
         <button
           onClick={() => {
@@ -1536,7 +1536,7 @@ export default function App() {
           className="panel-toggle-btn"
           style={{
             position: 'absolute',
-            left: '20px',
+            left: isSidebarCollapsed ? '20px' : '400px',
             top: '90px',
             zIndex: 1001,
           }}
