@@ -213,7 +213,7 @@ const TRANSLATIONS = {
     collapse_sidebar: "설정창 접기",
     expand_widget: "경로 안내 열기",
     collapse_widget: "경로 안내 접기",
-    brand_title: "스마트 대피 내비게이션 (VeloRoute)",
+    brand_title: "스마트 내비게이션 (VeloRoute)",
     brand_subtitle: "실시간 스마트 홍수 우회 대시보드",
     sensor_title: "실시간 센서 데이터 (Telemetry)",
     rain_label: "강수량 (몬순 우기)",
@@ -512,7 +512,7 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { role: 'bot', text: lang === 'ko'
-        ? '안녕하세요! 🌊 스마트 대피 내비게이션 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
+        ? '안녕하세요! 🌊 스마트 내비게이션 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
         : 'ສະບາຍດີ! 🌊 ຂ້ອຍແມ່ນ AI ຂອງ ລະບົບນຳທາງອັດສະລິຍະ.\nຖາມຂ້ອຍກ່ຽວກັບສະພາບອາກາດ, ເສັ້ນທາງ, ຫຼືຄວາມປອດໄພໄດ້ເລີຍ!'
     }
   ]);
