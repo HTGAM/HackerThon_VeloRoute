@@ -510,6 +510,7 @@ export default function App() {
 
   // ── AI Chatbot States ──────────────────────────────────────
   const [chatOpen, setChatOpen] = useState(false);
+  const [userApiKey, setUserApiKey] = useState(() => localStorage.getItem('veloroute_gemini_key') || '');
   const [chatMessages, setChatMessages] = useState([
     { role: 'bot', text: lang === 'ko'
         ? '안녕하세요! 🌊 스마트 내비게이션 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
@@ -1165,7 +1166,7 @@ export default function App() {
     setChatMessages(prev => [...prev, { role: 'user', text: input }]);
     setChatTyping(true);
 
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = userApiKey || import.meta.env.VITE_GEMINI_API_KEY;
     if (apiKey) {
       try {
         const activeRoute = !!routeData;
@@ -1236,7 +1237,7 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
         setChatTyping(false);
       }, 600);
     }
-  }, [chatInput, chatMessages, getBotReply, routeData, vehicle, rainIntensity, riverLevel, hazards, lang, translateRemark, getWeatherAlert]);
+  }, [chatInput, chatMessages, getBotReply, routeData, vehicle, rainIntensity, riverLevel, hazards, lang, translateRemark, getWeatherAlert, userApiKey]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -2102,6 +2103,54 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                 onClick={() => setChatOpen(false)}
                 style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >✕</button>
+            </div>
+
+            {/* API Key Input Panel */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderBottom: '1px solid rgba(96,165,250,0.15)',
+              padding: '0.45rem 0.75rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.25rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.62rem', color: '#93c5fd', fontWeight: 600 }}>
+                  {lang === 'ko' ? '🔑 Gemini API 키 설정' : '🔑 ລະຫັດ Gemini API'}
+                </span>
+                <span style={{ 
+                  fontSize: '0.6rem', 
+                  color: userApiKey ? '#4ade80' : '#eab308', 
+                  background: userApiKey ? 'rgba(74,222,128,0.1)' : 'rgba(234,179,8,0.1)',
+                  padding: '0.05rem 0.3rem',
+                  borderRadius: '4px',
+                  border: `1px solid ${userApiKey ? 'rgba(74,222,128,0.25)' : 'rgba(234,179,8,0.25)'}`
+                }}>
+                  {userApiKey 
+                    ? (lang === 'ko' ? '실시간 AI 모드' : 'ໂໝດ AI ແທ້') 
+                    : (lang === 'ko' ? '로컬 분석 모드' : 'ໂໝດທ້ອງຖິ່ນ')}
+                </span>
+              </div>
+              <input
+                type="password"
+                value={userApiKey}
+                onChange={e => {
+                  setUserApiKey(e.target.value);
+                  localStorage.setItem('veloroute_gemini_key', e.target.value);
+                }}
+                placeholder={lang === 'ko' ? 'API 키를 입력하면 AI 모드로 대답합니다...' : 'ປ້ອນຄີ API ຂອງເຈົ້າ...'}
+                style={{
+                  width: '100%',
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(96,165,250,0.2)',
+                  borderRadius: '6px',
+                  color: '#fff',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.7rem',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
             </div>
 
             {/* Messages */}
