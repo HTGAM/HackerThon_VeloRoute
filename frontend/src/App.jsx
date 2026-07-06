@@ -213,8 +213,8 @@ const TRANSLATIONS = {
     collapse_sidebar: "설정창 접기",
     expand_widget: "경로 안내 열기",
     collapse_widget: "경로 안내 접기",
-    brand_title: "벨로루트 비엔티안",
-    brand_subtitle: "스마트시티 실시간 홍수 회피 내비",
+    brand_title: "스마트 대피 내비게이션 (VeloRoute)",
+    brand_subtitle: "실시간 스마트 홍수 우회 대시보드",
     sensor_title: "실시간 센서 데이터 (Telemetry)",
     rain_label: "강수량 (몬순 우기)",
     river_label: "메콩강 수위",
@@ -325,8 +325,8 @@ const TRANSLATIONS = {
     collapse_sidebar: "ພັບເມນູຕັ້ງຄ່າ",
     expand_widget: "ເປີດແຜງນຳທາງ",
     collapse_widget: "ພັບແຜງນຳທາງ",
-    brand_title: "ເວໂລຣູດ ວຽງຈັນ",
-    brand_subtitle: "ລະບົບນຳທາງຫຼີກລ່ຽງນ້ຳຖ້ວມທັນເວລາ",
+    brand_title: "ລະບົບນຳທາງອັດສະລິຍະ (VeloRoute)",
+    brand_subtitle: "ແຜງຄວບຄຸມການຫຼີກລ່ຽງນ້ຳຖ້ວມອັດສະລິຍະ",
     sensor_title: "ຂໍ້ມູນເຊັນເຊີທັນເວລາ (Telemetry)",
     rain_label: "ປະລິມານນ້ຳຝົນ (ລະດູຝົນ)",
     river_label: "ລະດັບນ້ຳຂອງ",
@@ -512,8 +512,8 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { role: 'bot', text: lang === 'ko'
-        ? '안녕하세요! 🌊 벨로루트 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
-        : 'ສະບາຍດີ! 🌊 ຂ້ອຍແມ່ນ AI ຂອງ VeloRoute.\nຖາມຂ້ອຍກ່ຽວກັບສະພາບອາກາດ, ເສັ້ນທາງ, ຫຼືຄວາມປອດໄພໄດ້ເລີຍ!'
+        ? '안녕하세요! 🌊 스마트 대피 내비게이션 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
+        : 'ສະບາຍດີ! 🌊 ຂ້ອຍແມ່ນ AI ຂອງ ລະບົບນຳທາງອັດສະລິຍະ.\nຖາມຂ້ອຍກ່ຽວກັບສະພາບອາກາດ, ເສັ້ນທາງ, ຫຼືຄວາມປອດໄພໄດ້ເລີຍ!'
     }
   ]);
   const [chatInput, setChatInput] = useState('');

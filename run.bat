@@ -1,10 +1,10 @@
 @echo off
 set PATH=C:\Program Files\nodejs;%PATH%
-title VeloRoute Vientiane Launcher
+title Smart Evacuation Navigation (VeloRoute) Launcher
 color 0B
 
 echo =======================================================================
-echo               VeloRoute Vientiane - Smart City Navigation
+echo               Smart Evacuation Navigation (VeloRoute)
 echo               [One-Click Service Startup Launcher]
 echo =======================================================================
 echo.
