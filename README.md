@@ -32,18 +32,33 @@
 
 ## 🛠️ 기술 스택 (Tech Stack)
 
-### Backend
-* **Python 3.13** & **FastAPI**
-* **Dynamic Dijkstra Routing Algorithm** (사용자 제보 및 침수 깊이 실시간 반영 가중치 그래프)
-* **Hydrological Telemetry Simulator** (강수량 및 메콩강 범람 연동 도로 침수 수위 수치 시뮬레이터)
+### 🔤 사용 언어 (Languages)
+* **Python**: 백엔드 API 서버 설계, 수역학 시뮬레이션 물리 모델 구축, 다익스트라 경로 안내 핵심 알고리즘 개발.
+* **JavaScript (ES6+)**: React 기반의 반응형 대시보드 및 웹 GIS 사용자 인터페이스 구현.
+* **Lua**: OSRM(Open Source Routing Machine) 기판 지리 정보 분석을 위해, 뚝뚝 및 오토바이 특성에 맞춤 설계된 커스텀 가중치 필터링 프로파일(`tuktuk.lua`) 스크립팅.
+* **HTML5 / CSS3**: 전술 지휘통제소 스타일의 네온 테마 및 글래스모피즘(Glassmorphism) 시각 디자인 마크업.
+* **Batch (Windows Batch Script)**: 복잡한 빌드/설치 단계를 한 번에 실행시키는 원클릭 무설정 오토매틱 런처(`run.bat`) 스크립팅.
 
-### Frontend
-* **React** (Vite 번들러)
-* **React-Leaflet** (Futuristic Dark Matter 테마 지도 연동)
-* **Lucide React** (프리미엄 반응형 아이콘셋)
+### ⚙️ 백엔드 (Backend)
+* **FastAPI**: 초고속 비동기 ASGI 웹 프레임워크 기반 REST API 서버.
+* **Uvicorn**: 고성능 파이썬 ASGI 웹 서버.
+* **Dynamic Dijkstra Algorithm**: 사용자 재난 제보(실시간 우회 페널티 20배) 및 실시간 가변 침수 깊이(수위별 통행 불가 차단 및 최대 9배 서행 연산)가 반영되는 동적 가중치 알고리즘.
+* **Hydrological Telemetry Simulator**: 몬순 우기 강수량(mm/h)과 메콩강 수위 변화에 따른 도로별 실시간 침수 고도를 모의 연산하는 데이터 시뮬레이터 파이프라인.
 
-### Infrastructure (OSRM)
-* **OSRM (Open Source Routing Machine)**: 뚝뚝에 특화된 비포장 Tag 회피용 LUA 프로파일(`tuktuk.lua`) 설계 및 라오스 OSM 지리 데이터 정적 가중치 전처리 파이프라인 수립.
+### 💻 프론트엔드 (Frontend)
+* **React**: 사용자 중심 컴포넌트 기반 UI 라이브러리.
+* **Vite**: 초고속 프론트엔드 빌드 도구 및 개발 서버.
+* **React-Leaflet / Leaflet**: 지도 렌더링, 오프라인 호환 노드/링크 폴리라인 및 사용자 제보 마커 맵핑 웹 GIS 프레임워크 (Futuristic Dark Matter 맵 스킨).
+* **Lucide React**: 현대적인 시스템 아이콘 패키지.
+
+### 🧠 인공지능 (AI Integration)
+* **Google Gemini API (gemini-2.5-flash)**: 인앱 키 설정을 연동하여, 현재 사용자의 날씨 파라미터, 대피 대상 차량, Dijkstra로 탐색된 긴급 대피 경로(거리, 침수 비고) 등의 풍부한 실시간 물리 컨텍스트를 학습하고 재난 대처 가이드를 대화형으로 제공하는 지능형 비서.
+
+### 🐳 컨테이너화 및 인프라 (Infrastructure & DevOps)
+* **Docker & Docker Compose**: 멀티컨테이너 가상화 아키텍처 환경 구축.
+  - **`osrm-backend`**: 라오스 전체 OpenStreetMap(OSM) 지리 원천 데이터를 컴파일하고 커스텀 Lua 프로파일을 구동하는 지리 라우팅 백본 엔진.
+  - **`routing-api`**: OSRM 지리 정보와 실시간 침수 시뮬레이터를 병합해 최적 경로를 도출하는 FastAPI 백엔드 컨테이너.
+  - **`frontend`**: React 클라이언트 정적 파일을 서비스하고 챗봇을 연결하는 Vite 프론트엔드 컨테이너.
 
 ---
 
