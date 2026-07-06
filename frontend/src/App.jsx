@@ -511,6 +511,8 @@ export default function App() {
   // ── AI Chatbot States ──────────────────────────────────────
   const [chatOpen, setChatOpen] = useState(false);
   const [userApiKey, setUserApiKey] = useState(() => localStorage.getItem('veloroute_gemini_key') || '');
+  const [tempKey, setTempKey] = useState(() => localStorage.getItem('veloroute_gemini_key') || '');
+  const [saveStatus, setSaveStatus] = useState(''); // '', 'saved', 'cleared'
   const [chatMessages, setChatMessages] = useState([
     { role: 'bot', text: lang === 'ko'
         ? '안녕하세요! 🌊 스마트 내비게이션 AI입니다.\n현재 기상 상황, 침수 경로, 차량별 통행 가능 여부 등\n무엇이든 물어보세요!'
@@ -2117,6 +2119,16 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.62rem', color: '#93c5fd', fontWeight: 600 }}>
                   {lang === 'ko' ? '🔑 Gemini API 키 설정' : '🔑 ລະຫັດ Gemini API'}
+                  {saveStatus === 'saved' && (
+                    <span style={{ color: '#10b981', marginLeft: '0.4rem', fontWeight: 800 }}>
+                      {lang === 'ko' ? '✓ 저장완료' : '✓ ບັນທຶກແລ້ວ'}
+                    </span>
+                  )}
+                  {saveStatus === 'cleared' && (
+                    <span style={{ color: '#f87171', marginLeft: '0.4rem', fontWeight: 800 }}>
+                      {lang === 'ko' ? '✕ 키 해제됨' : '✕ ຍົກເລີກແລ້ວ'}
+                    </span>
+                  )}
                 </span>
                 <span style={{ 
                   fontSize: '0.6rem', 
@@ -2131,26 +2143,56 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                     : (lang === 'ko' ? '로컬 분석 모드' : 'ໂໝດທ້ອງຖິ່ນ')}
                 </span>
               </div>
-              <input
-                type="password"
-                value={userApiKey}
-                onChange={e => {
-                  setUserApiKey(e.target.value);
-                  localStorage.setItem('veloroute_gemini_key', e.target.value);
-                }}
-                placeholder={lang === 'ko' ? 'API 키를 입력하면 AI 모드로 대답합니다...' : 'ປ້ອນຄີ API ຂອງເຈົ້າ...'}
-                style={{
-                  width: '100%',
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(96,165,250,0.2)',
-                  borderRadius: '6px',
-                  color: '#fff',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.7rem',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              />
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <input
+                  type="password"
+                  value={tempKey}
+                  onChange={e => setTempKey(e.target.value)}
+                  placeholder={lang === 'ko' ? 'API 키를 입력하세요...' : 'ປ້ອນຄີ API ຂອງເຈົ້າ...'}
+                  style={{
+                    flex: 1,
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(96,165,250,0.2)',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.7rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    const trimmed = tempKey.trim();
+                    setUserApiKey(trimmed);
+                    localStorage.setItem('veloroute_gemini_key', trimmed);
+                    if (trimmed) {
+                      setSaveStatus('saved');
+                      try { playTone(800, 0.08); } catch(e){}
+                    } else {
+                      setSaveStatus('cleared');
+                      try { playTone(300, 0.12); } catch(e){}
+                    }
+                    setTimeout(() => setSaveStatus(''), 2000);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    padding: '0 0.6rem',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'opacity 0.15s'
+                  }}
+                  onMouseEnter={e => e.target.style.opacity='0.85'}
+                  onMouseLeave={e => e.target.style.opacity='1'}
+                >
+                  {lang === 'ko' ? '적용' : 'ນຳໃຊ້'}
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
