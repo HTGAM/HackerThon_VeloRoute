@@ -1158,18 +1158,85 @@ export default function App() {
       : `❓ "${input}"에 대한 정보를 찾지 못했어요.\n'도움말'이라고 물어보시면 할 수 있는 것들을 알려드릴게요!`;
   }, [lang, rainIntensity, riverLevel, routeData, vehicle, startNode, endNode, getWeatherAlert, translateRemark, getVehicleKorean]);
 
-  const handleChatSend = useCallback((text) => {
+  const handleChatSend = useCallback(async (text) => {
     const input = (text || chatInput).trim();
     if (!input) return;
     setChatInput('');
     setChatMessages(prev => [...prev, { role: 'user', text: input }]);
     setChatTyping(true);
-    setTimeout(() => {
-      const reply = getBotReply(input);
-      setChatMessages(prev => [...prev, { role: 'bot', text: reply }]);
-      setChatTyping(false);
-    }, 700);
-  }, [chatInput, getBotReply]);
+
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (apiKey) {
+      try {
+        const activeRoute = !!routeData;
+        const currentVehicle = routeData ? routeData.vehicle : vehicle;
+        const maxDepth = routeData ? (routeData.geojson?.properties?.max_water_depth || 0) : 0;
+        const routeNodes = routeData?.geojson?.properties?.path?.join(' → ') ?? '';
+        const alert = getWeatherAlert();
+
+        const systemPrompt = `You are the AI Assistant for '스마트 내비게이션 (Smart Navigation - VeloRoute)' — a flood-resilient smart navigation system in Vientiane, Laos.
+Your tone should be highly professional, reassuring, and helpful. You are trying to guide citizens safely during monsoon floods.
+You must answer in the user's language (Korean if the user asks in Korean, Lao if they ask in Lao).
+Please keep your answers relatively concise, helpful, and directly related to the Vientiane flood navigation context.
+
+[Current Live App Context]
+- Selected Vehicle: ${currentVehicle} (Specs: tuktuk limit is 0.15m, motorcycle limit is 0.22m, car limit is 0.40m)
+- Rain Intensity: ${rainIntensity} mm/h
+- Mekong River Level: ${riverLevel} m
+- Weather Alert: ${alert.level} (${alert.title} - ${alert.msg})
+- Route Calculated: ${activeRoute ? 'Yes' : 'No'}
+${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.distance_m}m\n- Route Max Water Depth: ${maxDepth}m\n- Route Remarks: ${routeData.remarks?.map(r => translateRemark(r)).join(', ')}` : ''}
+- Active Hazards: ${hazards.length > 0 ? hazards.map(h => `${h.type} at node ${h.name}`).join(', ') : 'None'}`;
+
+        // Map and clean conversation history (Gemini API contents must start with a user message)
+        const history = chatMessages
+          .filter((msg, idx) => idx > 0)
+          .map(msg => ({
+            role: msg.role === 'bot' ? 'model' : 'user',
+            parts: [{ text: msg.text }]
+          }));
+
+        history.push({
+          role: 'user',
+          parts: [{ text: input }]
+        });
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: systemPrompt }]
+            },
+            contents: history
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || (lang === 'ko' ? '대답을 생성하지 못했습니다.' : 'ບໍ່ສາມາດສ້າງຄຳຕອບໄດ້.');
+        setChatMessages(prev => [...prev, { role: 'bot', text: botReply }]);
+      } catch (err) {
+        console.error('Gemini API call failed, falling back to local bot:', err);
+        const localReply = getBotReply(input);
+        setChatMessages(prev => [...prev, { role: 'bot', text: localReply }]);
+      } finally {
+        setChatTyping(false);
+      }
+    } else {
+      // Local fallback if API key is missing
+      setTimeout(() => {
+        const localReply = getBotReply(input);
+        setChatMessages(prev => [...prev, { role: 'bot', text: localReply }]);
+        setChatTyping(false);
+      }, 600);
+    }
+  }, [chatInput, chatMessages, getBotReply, routeData, vehicle, rainIntensity, riverLevel, hazards, lang, translateRemark, getWeatherAlert]);
 
   // Auto-scroll chat
   useEffect(() => {
