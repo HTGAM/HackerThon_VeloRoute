@@ -24,8 +24,165 @@ import {
   CheckCircle,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Video
 } from 'lucide-react';
+
+// Simulated AI CCTV Live Feed using HTML5 Canvas
+function CCTVFeed({ stationId, name, depth, people, status, lang }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let frame = 0;
+
+    // Generate semi-fixed pedestrian targets to walk around
+    const targets = Array.from({ length: people }, (_, i) => ({
+      x: 30 + Math.random() * (canvas.width - 90),
+      y: 40 + Math.random() * (canvas.height - 100),
+      w: 16 + Math.random() * 8,
+      h: 35 + Math.random() * 15,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      id: `P${100 + i}`
+    }));
+
+    const render = () => {
+      frame++;
+      
+      // 1. Draw CCTV Dark Background
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Draw Radar Grid Lines
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.08)';
+      ctx.lineWidth = 1;
+      const gridSize = 25;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // 3. Draw Scanlines
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      for (let y = (frame % 3); y < canvas.height; y += 3) {
+        ctx.fillRect(0, y, canvas.width, 1);
+      }
+
+      // 4. Draw water flooding if depth is positive
+      if (depth > 0) {
+        const waterHeight = Math.min(canvas.height - 30, 15 + depth * 250);
+        const yStart = canvas.height - waterHeight;
+        
+        ctx.fillStyle = 'rgba(30, 58, 138, 0.35)'; // Semitransparent navy water
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height);
+        ctx.lineTo(0, yStart);
+        for (let x = 0; x <= canvas.width; x += 15) {
+          const wave = Math.sin((x / 20) + (frame * 0.08)) * 3;
+          ctx.lineTo(x, yStart + wave);
+        }
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.fill();
+
+        // Level threshold marker line
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(0, yStart);
+        ctx.lineTo(canvas.width, yStart);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`WATER LVL: ${(depth*100).toFixed(0)}cm`, 10, yStart - 4);
+      }
+
+      // 5. Draw OpenCV bounding boxes around detected people
+      targets.forEach(t => {
+        t.x += t.vx;
+        t.y += t.vy;
+        if (t.x < 10 || t.x > canvas.width - t.w - 10) t.vx *= -1;
+        if (t.y < 30 || t.y > canvas.height - t.h - 10) t.vy *= -1;
+
+        ctx.strokeStyle = '#22d3ee'; // Neon Cyan
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(t.x, t.y, t.w, t.h);
+
+        // Bounding box labels
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.9)';
+        ctx.font = '7px monospace';
+        ctx.fillText(`${t.id} (94%)`, t.x, t.y - 3);
+      });
+
+      // 6. Draw CCTV HUD (REC indicator, timestamp)
+      if (Math.floor(frame / 30) % 2 === 0) {
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(15, 15, 3.5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('REC', 23, 18);
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText(timeStr, canvas.width - 70, 18);
+
+      // Camera node info overlay
+      ctx.fillStyle = 'rgba(34, 211, 238, 0.8)';
+      ctx.font = 'bold 7.5px monospace';
+      ctx.fillText(`CAM_${stationId} @ NODE_${stationId}`, 10, canvas.height - 10);
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [people, depth]);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '140px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(34, 211, 238, 0.3)' }}>
+      <canvas ref={canvasRef} width={260} height={140} style={{ width: '100%', height: '100%', display: 'block' }} />
+      {status === 'danger' && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: '#ef4444',
+          fontSize: '0.75rem',
+          fontWeight: 800,
+          fontFamily: 'monospace',
+          textShadow: '0 0 5px #000, 2px 2px 0 #000',
+          animation: 'blink 0.5s infinite',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none'
+        }}>
+          ⚠️ AVOID: NO PEDESTRIANS
+        </div>
+      )}
+    </div>
+  );
+}
 
 // API Configuration
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8001';
@@ -318,7 +475,17 @@ const TRANSLATIONS = {
     game_exit_btn: "게임 종료 (Exit)",
     game_restart_btn: "다시 도전",
     game_rank_register: "등록",
-    game_rank_msg: "랭킹에 기록되었습니다!"
+    game_rank_msg: "랭킹에 기록되었습니다!",
+    cctv_title: "AI CCTV 도로 안전 모니터링",
+    cctv_status: "분석 상태",
+    cctv_people: "감지된 보행자",
+    cctv_water: "수위 감지",
+    cctv_status_safe: "정상 통행 (Safe)",
+    cctv_status_caution: "주의 통행 (Passable with Caution)",
+    cctv_status_danger: "진입 금지 (Danger - Closed)",
+    cctv_danger_desc: "⚠️ 침수가 감지되었으나 도로에 통행자(보행자)가 전혀 감지되지 않아 위험도가 매우 높습니다. 아무도 여기 다니지 않으니 즉시 다른 우회로로 도십시오!",
+    cctv_caution_desc: "⚠️ 도로에 침수가 발생했으나 일부 통행자(보행자)가 감지되어 서행 주의 통과가 가능합니다.",
+    cctv_safe_desc: "✅ 도로가 안전하며 통행이 원활합니다. 보행자 흐름 양호."
   },
   lo: {
     expand_sidebar: "ເປີດເມນູຕັ້ງຄ່າ",
@@ -432,7 +599,17 @@ const TRANSLATIONS = {
     game_exit_btn: "ອອກຈາກເກມ (Exit)",
     game_restart_btn: "ຫຼິ້ນຄືນໃໝ່",
     game_rank_register: "ບັນທຶກ",
-    game_rank_msg: "ບັນທຶກຄະແນນສຳເລັດແລ້ວ!"
+    game_rank_msg: "ບັນທຶກຄະແນນສຳເລັດແລ້ວ!",
+    cctv_title: "ກ້ອງວົງຈອນປິດຕາມຖະໜົນ AI",
+    cctv_status: "ສະຖານະການວິເຄາະ",
+    cctv_people: "ຄົນຍ່າງທີ່ກວດພົບ",
+    cctv_water: "ລະດັບນ້ຳຖ້ວມ",
+    cctv_status_safe: "ຜ່ານໄດ້ປົກກະຕິ (Safe)",
+    cctv_status_caution: "ຜ່ານໄດ້ດ້ວຍຄວາມລະມັດລະວັງ (Caution)",
+    cctv_status_danger: "ຫ້າມຜ່ານ (Danger - Closed)",
+    cctv_danger_desc: "⚠️ ມີນ້ຳຖ້ວມ ແລະ ບໍ່ມີຄົນຍ່າງຜ່ານທາງເລີຍ. ຄວາມສ່ຽງສູງຫຼາຍ! ກະລຸນາຫຼີກລ່ຽງເສັ້ນທາງນີ້ ແລະ ໄປທາງອື່ນ!",
+    cctv_caution_desc: "⚠️ ມີນ້ຳຖ້ວມບາງສ່ວນ ແຕ່ຍັງມີຄົນຍ່າງຜ່ານຢູ່. ສາມາດຂັບຂີ່ໄດ້ດ້ວຍຄວາມລະມັດລະວັງ.",
+    cctv_safe_desc: "✅ ເສັ້ນທາງປອດໄພ ແລະ ການສັນຈອນສະດວກດີ."
   }
 };
 
@@ -445,9 +622,48 @@ function MapController({ center }) {
   return null;
 }
 
+const CCTV_STATIONS = [
+  { id: 'A', name: 'Mekong Riverside CCTV #1', node: 'A', lat: 17.9628, lng: 102.6075, telemetry_id: 'Quai_Fa_Ngum_West' },
+  { id: 'I', name: 'Patuxay Monument CCTV #2', node: 'I', lat: 17.9705, lng: 102.6186, telemetry_id: 'Lane_Xang_Ave' },
+  { id: 'Q', name: 'That Luang Square CCTV #3', node: 'Q', lat: 17.9735, lng: 102.6360, telemetry_id: 'Lane_Xang_Ave' },
+  { id: 'V', name: 'Dong Dok Highway CCTV #4', node: 'V', lat: 18.0280, lng: 102.6390, telemetry_id: 'Lane_Xang_Ave' }
+];
+
 export default function App() {
   // Language switcher state
   const [lang, setLang] = useState('ko');
+
+  // CCTV status resolver
+  const getCCTVStatus = useCallback((nodeId) => {
+    const mapping = {
+      'A': 'Quai_Fa_Ngum_West',
+      'I': 'Lane_Xang_Ave',
+      'Q': 'Lane_Xang_Ave',
+      'V': 'Lane_Xang_Ave'
+    };
+    const tId = mapping[nodeId];
+    const depth = (telemetry && telemetry[tId]) ? (telemetry[tId].water_depth_m || 0) : 0;
+    
+    const basePeople = { 'A': 10, 'I': 20, 'Q': 15, 'V': 12 };
+    let people = basePeople[nodeId] || 10;
+    
+    if (depth > 0.0) {
+      if (nodeId === 'I') {
+        people = Math.max(0, Math.floor(people * (1 - (depth / 0.22))));
+      } else if (nodeId === 'Q') {
+        people = Math.max(0, Math.floor(people * (1 - (depth / 0.30))));
+      } else {
+        people = depth > 0.10 ? 0 : Math.max(0, Math.floor(people * (1 - (depth / 0.10))));
+      }
+    }
+    
+    let status = 'safe';
+    if (depth > 0.05) {
+      status = people === 0 ? 'danger' : 'caution';
+    }
+    
+    return { depth, people, status };
+  }, [telemetry]);
 
   // Translation helper
   const t = (key) => {
@@ -1903,6 +2119,96 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                         </div>
                       </>
                     )}
+                  </div>
+                </Popup>
+              </CircleMarker>
+            );
+          })}
+
+          {/* Render Raspberry Pi AI CCTV Cameras */}
+          {!isGameMode && CCTV_STATIONS.map((cctv) => {
+            const { depth, people, status } = getCCTVStatus(cctv.id);
+            
+            // Marker colors based on status (Safe: Cyan, Caution: Yellow, Danger: Red)
+            const cctvColors = {
+              safe: '#22d3ee',      // bright cyan
+              caution: '#eab308',   // warning yellow
+              danger: '#ef4444'     // danger red
+            };
+            const markerColor = cctvColors[status] || '#22d3ee';
+            
+            return (
+              <CircleMarker
+                key={cctv.id}
+                center={[cctv.lat, cctv.lng]}
+                radius={10}
+                pathOptions={{
+                  fillColor: markerColor,
+                  fillOpacity: 0.85,
+                  color: '#ffffff',
+                  weight: 2.0
+                }}
+                className="cctv-pulse-marker"
+              >
+                <Popup>
+                  <div style={{ color: '#e2e8f0', fontSize: '0.85rem', width: '260px', background: '#0a0f1d', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(34, 211, 238, 0.2)', boxSizing: 'border-box' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '0.35rem', marginBottom: '0.5rem' }}>
+                      <Video size={14} style={{ color: '#22d3ee' }} />
+                      <h4 style={{ margin: 0, fontWeight: 700, fontSize: '0.8rem', color: '#fff' }}>
+                        {cctv.name}
+                      </h4>
+                    </div>
+
+                    {/* Simulated live video feed canvas */}
+                    <CCTVFeed 
+                      stationId={cctv.id} 
+                      name={cctv.name} 
+                      depth={depth} 
+                      people={people} 
+                      status={status} 
+                      lang={lang} 
+                    />
+
+                    {/* AI Diagnostics status details */}
+                    <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.15rem' }}>
+                        <span style={{ color: '#94a3b8' }}>{t('cctv_status')}:</span>
+                        <span style={{ 
+                          fontWeight: 700, 
+                          color: markerColor 
+                        }}>
+                          {t(`cctv_status_${status}`)}
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.15rem' }}>
+                        <span style={{ color: '#94a3b8' }}>{t('cctv_water')}:</span>
+                        <span style={{ fontWeight: 600, color: depth > 0 ? '#ef4444' : '#4ade80' }}>
+                          {(depth * 100).toFixed(0)} cm
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.15rem' }}>
+                        <span style={{ color: '#94a3b8' }}>{t('cctv_people')}:</span>
+                        <span style={{ fontWeight: 600, color: '#fff' }}>
+                          {people} 명
+                        </span>
+                      </div>
+
+                      {/* Descriptive status comment */}
+                      <p style={{ 
+                        margin: '0.35rem 0 0', 
+                        fontSize: '0.68rem', 
+                        lineHeight: 1.35, 
+                        color: status === 'danger' ? '#fca5a5' : (status === 'caution' ? '#fef08a' : '#a7f3d0'),
+                        background: 'rgba(255,255,255,0.03)',
+                        padding: '0.35rem',
+                        borderRadius: '6px',
+                        border: `1px solid ${status === 'danger' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.08)'}`
+                      }}>
+                        {t(`cctv_${status}_desc`)}
+                      </p>
+                    </div>
                   </div>
                 </Popup>
               </CircleMarker>

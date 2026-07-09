@@ -184,7 +184,7 @@ class VientianeRouter:
             n2 = self.nodes[edge["v"]]
             edge["distance"] = haversine_distance(n1["lat"], n1["lng"], n2["lat"], n2["lng"])
 
-    def get_adjacency_list(self, vehicle: str, telemetry_data: Dict[str, Any], hazards: List[str] = None) -> Dict[str, List[Dict[str, Any]]]:
+    def get_adjacency_list(self, vehicle: str, telemetry_data: Dict[str, Any], hazards: List[str] = None, start: str = None, end: str = None) -> Dict[str, List[Dict[str, Any]]]:
         """
         Generates an adjacency list where weights are adjusted based on:
         - Surface type penalties (specifically for tuk-tuks)
@@ -230,6 +230,31 @@ class VientianeRouter:
                 # Disconnected! Road is closed for this vehicle type
                 continue
                 
+            # CHECK 1.5: CCTV Crowdsensing Filter
+            # If the edge connects to a CCTV node (A, I, Q, V) and there is flooding (>0.05m),
+            # check simulated pedestrian occupancy. If people count is 0, we block this road.
+            # "아무도 여기 다니지 않는다. 너도 가지 마라."
+            cctv_nodes = {"A", "I", "Q", "V"}
+            if flood_depth > 0.05 and (u in cctv_nodes or v in cctv_nodes):
+                cctv_node = u if u in cctv_nodes else v
+                base_people = {"A": 10, "I": 20, "Q": 15, "V": 12}
+                people_count = base_people.get(cctv_node, 10)
+                # Reduce people count based on depth
+                if cctv_node == "I":
+                    people_count = max(0, int(people_count * (1 - (flood_depth / 0.22))))
+                elif cctv_node == "Q":
+                    people_count = max(0, int(people_count * (1 - (flood_depth / 0.30))))
+                else: # Mekong (A) & Dong Dok (V) - people avoid very quickly
+                    people_count = 0 if flood_depth > 0.10 else max(0, int(people_count * (1 - (flood_depth / 0.10))))
+                
+                if people_count == 0:
+                    if cctv_node == start or cctv_node == end:
+                        # Do not block the start/end nodes, user needs to escape or arrive.
+                        pass
+                    else:
+                        # Disconnected! Closed due to zero pedestrians on flooded road.
+                        continue
+                
             # CHECK 2: Calculate dynamic weight (representing travel time / risk score)
             # Base weight is distance multiplied by road type factor
             road_multipliers = {
@@ -271,7 +296,7 @@ class VientianeRouter:
         if start not in self.nodes or end not in self.nodes:
             return {"error": "Invalid start or end node"}
             
-        adj = self.get_adjacency_list(vehicle, telemetry_data, hazards)
+        adj = self.get_adjacency_list(vehicle, telemetry_data, hazards, start, end)
         
         # Priority queue stores tuples of (current_weight, current_node, path_history)
         pq = [(0.0, start, [start])]
