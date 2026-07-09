@@ -184,6 +184,203 @@ function CCTVFeed({ stationId, name, depth, people, status, lang }) {
   );
 }
 
+// Simulated User Web Camera AI Object Detection Demo
+function WebcamAICam() {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [stream, setStream] = useState(null);
+  const [isActive, setIsActive] = useState(false);
+  const [error, setError] = useState('');
+
+  const startCamera = async () => {
+    try {
+      setError('');
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240 }
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.play();
+      }
+      setIsActive(true);
+    } catch (err) {
+      console.error(err);
+      setError('카메라를 활성화할 수 없습니다. 권한을 확인하세요.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    setStream(null);
+    setIsActive(false);
+  };
+
+  useEffect(() => {
+    if (!isActive) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let frame = 0;
+
+    let boxX = 110;
+    let boxY = 70;
+    let boxW = 100;
+    let boxH = 110;
+    let targetX = 110;
+    let targetY = 70;
+
+    const draw = () => {
+      frame++;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Scanline scan overlay
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.05)';
+        for (let y = (frame % 4); y < canvas.height; y += 4) {
+          ctx.fillRect(0, y, canvas.width, 1);
+        }
+
+        // Bounding box animation
+        if (frame % 35 === 0) {
+          targetX = 85 + Math.random() * 50;
+          targetY = 45 + Math.random() * 40;
+        }
+        boxX += (targetX - boxX) * 0.1;
+        boxY += (targetY - boxY) * 0.1;
+
+        ctx.strokeStyle = '#22d3ee';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        ctx.fillStyle = '#22d3ee';
+        const len = 8;
+        ctx.fillRect(boxX - 2, boxY - 2, len, 3);
+        ctx.fillRect(boxX - 2, boxY - 2, 3, len);
+        ctx.fillRect(boxX + boxW - len + 2, boxY - 2, len, 3);
+        ctx.fillRect(boxX + boxW - 1, boxY - 2, 3, len);
+        ctx.fillRect(boxX - 2, boxY + boxH - 1, len, 3);
+        ctx.fillRect(boxX - 2, boxY + boxH - len + 2, 3, len);
+        ctx.fillRect(boxX + boxW - len + 2, boxY + boxH - 1, len, 3);
+        ctx.fillRect(boxX + boxW - 1, boxY + boxH - len + 2, 3, len);
+
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.85)';
+        ctx.fillRect(boxX, boxY - 14, 95, 14);
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText('PEDESTRIAN (98.7%)', boxX + 4, boxY - 4);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '7.5px monospace';
+        ctx.fillText(`DEVICE: LOCAL_WEBCAM_AI`, 8, 15);
+        ctx.fillText(`FPS: 30 / TEMP: 33.2C`, 8, 25);
+
+        if (Math.floor(frame / 15) % 2 === 0) {
+          ctx.fillStyle = '#22d3ee';
+          ctx.beginPath();
+          ctx.arc(canvas.width - 15, 15, 3, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.fillStyle = '#22d3ee';
+          ctx.font = 'bold 7px monospace';
+          ctx.fillText('AI ACTIVE', canvas.width - 58, 17);
+        }
+      } else {
+        ctx.fillStyle = '#0a0f1d';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#22d3ee';
+        ctx.font = '9px monospace';
+        ctx.fillText('INITIALIZING WEBCAM STREAM...', 45, canvas.height / 2);
+      }
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [isActive, stream]);
+
+  return (
+    <div style={{
+      border: '1px solid rgba(0, 242, 254, 0.25)',
+      background: 'rgba(10, 15, 30, 0.65)',
+      borderRadius: '14px',
+      padding: '0.75rem',
+      marginTop: '0.8rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#00f2fe', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          📷 Live AI Camera 데모
+        </span>
+        <button
+          onClick={isActive ? stopCamera : startCamera}
+          style={{
+            padding: '0.25rem 0.6rem',
+            fontSize: '0.75rem',
+            fontWeight: '600',
+            borderRadius: '6px',
+            border: 'none',
+            background: isActive ? '#ef4444' : '#00f2fe',
+            color: '#000',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          {isActive ? '카메라 끄기' : '카메라 켜기'}
+        </button>
+      </div>
+
+      {error && <div style={{ fontSize: '0.7rem', color: '#ef4444' }}>{error}</div>}
+
+      <video ref={videoRef} style={{ display: 'none' }} playsInline muted />
+
+      {isActive ? (
+        <div style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(34, 211, 238, 0.4)' }}>
+          <canvas ref={canvasRef} width={320} height={240} style={{ width: '100%', height: '100%', display: 'block' }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '5px',
+            left: '5px',
+            background: 'rgba(0,0,0,0.7)',
+            padding: '0.2rem 0.4rem',
+            borderRadius: '4px',
+            fontSize: '0.65rem',
+            color: '#4ade80',
+            border: '1px solid rgba(74, 222, 128, 0.3)'
+          }}>
+            ✓ 보행자(사용자) 인식 완료: 통행 주의 가능 반영
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          height: '80px',
+          background: 'rgba(255,255,255,0.02)',
+          borderRadius: '8px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          border: '1px dashed rgba(255,255,255,0.1)',
+          fontSize: '0.7rem',
+          color: '#94a3b8',
+          textAlign: 'center',
+          padding: '0 1rem',
+          lineHeight: 1.4
+        }}>
+          [카메라 켜기] 버튼을 누르면 웹캠이 켜지며 실시간 보행자 인식 시뮬레이션 데모가 구동됩니다.
+        </div>
+      )}
+    </div>
+  );
+}
+
 // API Configuration
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8001';
 
@@ -1837,6 +2034,9 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
             )}
           </div>
         </div>
+
+        {/* Live device webcam AI sensing demo */}
+        <WebcamAICam />
 
         {/* Collapsible Cyber Telemetry Terminal */}
         <details className="telemetry-details">
