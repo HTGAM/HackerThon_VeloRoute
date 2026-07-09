@@ -358,6 +358,43 @@ class VientianeRouter:
                                 max_water_encountered = max(max_water_encountered, telemetry_data[edge["telemetry_id"]]["water_depth_m"])
                                 
                 remarks = []
+                
+                # Check which CCTV nodes are blocked due to zero pedestrians on flooded roads
+                blocked_cctvs = []
+                cctv_nodes = {"A", "I", "Q", "V"}
+                cctv_names = {
+                    "A": "메콩강변 CCTV #1",
+                    "I": "빠뚜사이 CCTV #2",
+                    "Q": "탓루앙 CCTV #3",
+                    "V": "동독 대학교 CCTV #4"
+                }
+                for c_node in cctv_nodes:
+                    if c_node == start or c_node == end:
+                        continue
+                    # Find edges connected to c_node and get max depth
+                    depth = 0.0
+                    for edge in self.edges:
+                        if edge["u"] == c_node or edge["v"] == c_node:
+                            t_id = edge["telemetry_id"]
+                            if telemetry_data and t_id in telemetry_data:
+                                depth = max(depth, telemetry_data[t_id]["water_depth_m"])
+                    
+                    if depth > 0.05:
+                        base_people = {"A": 10, "I": 20, "Q": 15, "V": 12}
+                        people_count = base_people.get(c_node, 10)
+                        if c_node == "I":
+                            people_count = max(0, int(people_count * (1 - (depth / 0.22))))
+                        elif c_node == "Q":
+                            people_count = max(0, int(people_count * (1 - (depth / 0.30))))
+                        else:
+                            people_count = 0 if depth > 0.10 else max(0, int(people_count * (1 - (depth / 0.10))))
+                        
+                        if people_count == 0:
+                            blocked_cctvs.append(cctv_names[c_node])
+                            
+                for cctv_name in blocked_cctvs:
+                    remarks.append(f"🚨 CCTV 분석 우회: [{cctv_name}] 지점에 침수 발생 및 보행자 미감지로 인해 안전한 경로로 우회합니다.")
+
                 if max_water_encountered > 0.0:
                     remarks.append(f"주의: 최대 {max_water_encountered:.2f}m 깊이의 침수 도로 구간을 통과합니다.")
                 if unpaved_traversed:

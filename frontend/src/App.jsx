@@ -623,10 +623,10 @@ function MapController({ center }) {
 }
 
 const CCTV_STATIONS = [
-  { id: 'A', name: 'Mekong Riverside CCTV #1', node: 'A', lat: 17.9628, lng: 102.6075, telemetry_id: 'Quai_Fa_Ngum_West' },
-  { id: 'I', name: 'Patuxay Monument CCTV #2', node: 'I', lat: 17.9705, lng: 102.6186, telemetry_id: 'Lane_Xang_Ave' },
-  { id: 'Q', name: 'That Luang Square CCTV #3', node: 'Q', lat: 17.9735, lng: 102.6360, telemetry_id: 'Lane_Xang_Ave' },
-  { id: 'V', name: 'Dong Dok Highway CCTV #4', node: 'V', lat: 18.0280, lng: 102.6390, telemetry_id: 'Lane_Xang_Ave' }
+  { id: 'A', name: 'Mekong Riverside CCTV #1', node: 'A', lat: 17.9634, lng: 102.6063, telemetry_id: 'Quai_Fa_Ngum_West' },
+  { id: 'I', name: 'Patuxay Monument CCTV #2', node: 'I', lat: 17.9712, lng: 102.6198, telemetry_id: 'Lane_Xang_Ave' },
+  { id: 'Q', name: 'That Luang Square CCTV #3', node: 'Q', lat: 17.9742, lng: 102.6372, telemetry_id: 'Lane_Xang_Ave' },
+  { id: 'V', name: 'Dong Dok Highway CCTV #4', node: 'V', lat: 18.0287, lng: 102.6402, telemetry_id: 'Lane_Xang_Ave' }
 ];
 
 export default function App() {
