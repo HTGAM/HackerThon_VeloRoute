@@ -633,37 +633,7 @@ export default function App() {
   // Language switcher state
   const [lang, setLang] = useState('ko');
 
-  // CCTV status resolver
-  const getCCTVStatus = useCallback((nodeId) => {
-    const mapping = {
-      'A': 'Quai_Fa_Ngum_West',
-      'I': 'Lane_Xang_Ave',
-      'Q': 'Lane_Xang_Ave',
-      'V': 'Lane_Xang_Ave'
-    };
-    const tId = mapping[nodeId];
-    const depth = (telemetry && telemetry[tId]) ? (telemetry[tId].water_depth_m || 0) : 0;
-    
-    const basePeople = { 'A': 10, 'I': 20, 'Q': 15, 'V': 12 };
-    let people = basePeople[nodeId] || 10;
-    
-    if (depth > 0.0) {
-      if (nodeId === 'I') {
-        people = Math.max(0, Math.floor(people * (1 - (depth / 0.22))));
-      } else if (nodeId === 'Q') {
-        people = Math.max(0, Math.floor(people * (1 - (depth / 0.30))));
-      } else {
-        people = depth > 0.10 ? 0 : Math.max(0, Math.floor(people * (1 - (depth / 0.10))));
-      }
-    }
-    
-    let status = 'safe';
-    if (depth > 0.05) {
-      status = people === 0 ? 'danger' : 'caution';
-    }
-    
-    return { depth, people, status };
-  }, [telemetry]);
+
 
   // Translation helper
   const t = (key) => {
@@ -739,6 +709,38 @@ export default function App() {
   const [chatTyping, setChatTyping] = useState(false);
   const chatEndRef = useRef(null);
   const chatInputRef = useRef(null);
+
+  // CCTV status resolver - declared after state hooks to prevent temporal dead zone (TDZ) reference errors
+  const getCCTVStatus = useCallback((nodeId) => {
+    const mapping = {
+      'A': 'Quai_Fa_Ngum_West',
+      'I': 'Lane_Xang_Ave',
+      'Q': 'Lane_Xang_Ave',
+      'V': 'Lane_Xang_Ave'
+    };
+    const tId = mapping[nodeId];
+    const depth = (telemetry && telemetry[tId]) ? (telemetry[tId].water_depth_m || 0) : 0;
+    
+    const basePeople = { 'A': 10, 'I': 20, 'Q': 15, 'V': 12 };
+    let people = basePeople[nodeId] || 10;
+    
+    if (depth > 0.0) {
+      if (nodeId === 'I') {
+        people = Math.max(0, Math.floor(people * (1 - (depth / 0.22))));
+      } else if (nodeId === 'Q') {
+        people = Math.max(0, Math.floor(people * (1 - (depth / 0.30))));
+      } else {
+        people = depth > 0.10 ? 0 : Math.max(0, Math.floor(people * (1 - (depth / 0.10))));
+      }
+    }
+    
+    let status = 'safe';
+    if (depth > 0.05) {
+      status = people === 0 ? 'danger' : 'caution';
+    }
+    
+    return { depth, people, status };
+  }, [telemetry]);
   
   // Load initial nodes on mount
   useEffect(() => {
