@@ -185,7 +185,7 @@ function CCTVFeed({ stationId, name, depth, people, status, lang }) {
 }
 
 // Simulated User Web Camera AI Object Detection Demo
-function WebcamAICam() {
+function WebcamAICam({ isSidebarCollapsed }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
