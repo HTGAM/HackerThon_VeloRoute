@@ -2035,9 +2035,6 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
           </div>
         </div>
 
-        {/* Live device webcam AI sensing demo */}
-        <WebcamAICam />
-
         {/* Collapsible Cyber Telemetry Terminal */}
         <details className="telemetry-details">
           <summary className="telemetry-summary">
@@ -2430,6 +2427,9 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
             />
           )}
         </MapContainer>
+
+        {/* Floating User device AI Webcam Dashcam */}
+        <WebcamAICam isSidebarCollapsed={isSidebarCollapsed} />
 
         {/* Floating Route Status Overlay */}
         {/* Floating Route Status Overlay */}
