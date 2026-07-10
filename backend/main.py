@@ -502,15 +502,8 @@ def generate_webcam_frames(station_id: str):
                 cv2.putText(frame, "person 0.88", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
                 last_box_timer -= 1
             else:
-                # Idle Scanning state: Draw a scanning box with small breathing motion in center
-                import math
-                t_val = time.time() * 2.5
-                offset_x = int(math.sin(t_val) * 12)
-                offset_y = int(math.cos(t_val * 0.8) * 6)
-                cx, cy = frame_width // 2 + offset_x, frame_height // 2 + offset_y
-                
-                cv2.rectangle(frame, (cx - 45, cy - 65), (cx + 45, cy + 65), (0, 255, 255), 2)
-                cv2.putText(frame, "person 0.82", (cx - 45, cy - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                # Idle state: No person detected. Do not draw any bounding boxes.
+                pass
             
             # Draw HUD
             cv2.putText(frame, f"RASPBERRY_PI_CAM_{station_id} (LIVE)", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
