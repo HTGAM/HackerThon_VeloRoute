@@ -890,6 +890,9 @@ export default function App() {
   const [sidebarCctvActive, setSidebarCctvActive] = useState(false);
   const [sidebarCctvStation, setSidebarCctvStation] = useState('A');
   const [sidebarCctvMode, setSidebarCctvMode] = useState('canvas');
+  const [cctvPos, setCctvPos] = useState({ x: 450, y: 150 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Sidebar and widget collapse states
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -950,6 +953,41 @@ export default function App() {
       .then(data => setNodes(data))
       .catch(err => console.error("Error loading nodes:", err));
   }, []);
+
+  // Draggable CCTV Window Handlers
+  const handleMouseDown = useCallback((e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - cctvPos.x,
+      y: e.clientY - cctvPos.y
+    });
+    e.preventDefault();
+  }, [cctvPos]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      setCctvPos({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart]);
 
   // ── Web Audio API Sound Synthesizer ────────────────────────
   const playTone = useCallback((freq, duration, type = 'sine') => {
@@ -2077,30 +2115,23 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
           </div>
 
           {sidebarCctvActive ? (
-            <div>
-              {/* Active OpenCV Python Live Stream Feed */}
-              <div style={{ position: 'relative', width: '100%', height: '180px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(0, 242, 254, 0.4)' }}>
-                <img 
-                  src={`${API_BASE}/api/cctv/stream/live`} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  alt="CCTV stream"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                    const parent = e.target.parentElement;
-                    const errDiv = document.createElement('div');
-                    errDiv.innerText = "⚠️ 카메라 연결 불가 (백엔드 점검 중)";
-                    errDiv.style.color = "#ef4444";
-                    errDiv.style.fontSize = "0.75rem";
-                    errDiv.style.fontFamily = "monospace";
-                    errDiv.style.position = "absolute";
-                    errDiv.style.top = "50%";
-                    errDiv.style.left = "50%";
-                    errDiv.style.transform = "translate(-50%, -50%)";
-                    parent.appendChild(errDiv);
-                  }}
-                />
-              </div>
+            <div style={{
+              height: '80px',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1.5px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontSize: '0.68rem',
+              color: '#4ade80',
+              textAlign: 'center',
+              padding: '0 0.8rem',
+              lineHeight: 1.4
+            }}>
+              <span style={{ fontWeight: 'bold', marginBottom: '0.2rem' }}>● LIVE CAMERA ACTIVE</span>
+              <span>우측 지도 위에 이동 가능한 대형 실시간 관제창이 팝업되었습니다.</span>
             </div>
           ) : (
             <div style={{
@@ -2117,7 +2148,7 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
               padding: '0 1rem',
               lineHeight: 1.4
             }}>
-              POWER ON 버튼을 클릭하시면 실시간 AI 객체 감지 및 CCTV 스트림 피드가 시작됩니다.
+              POWER ON 버튼을 클릭하시면 실시간 AI 객체 감지 및 CCTV 스트림 피드 팝업창이 활성화됩니다.
             </div>
           )}
         </div>
@@ -2425,6 +2456,98 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
             />
           )}
         </MapContainer>
+
+        {/* Floating Draggable Real-time CCTV Video Feed */}
+        {sidebarCctvActive && (
+          <div 
+            style={{
+              position: 'fixed',
+              left: `${cctvPos.x}px`,
+              top: `${cctvPos.y}px`,
+              width: '420px',
+              background: 'rgba(10, 15, 30, 0.92)',
+              backdropFilter: 'blur(10px)',
+              border: '2px solid #00f2fe',
+              borderRadius: '12px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 242, 254, 0.2)',
+              zIndex: 9999,
+              color: '#fff',
+              fontFamily: 'monospace',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Title Bar Handle */}
+            <div 
+              onMouseDown={handleMouseDown}
+              style={{
+                background: 'linear-gradient(90deg, #0f172a, #1e293b)',
+                padding: '0.65rem 0.8rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'move',
+                userSelect: 'none',
+                borderBottom: '1px solid rgba(0, 242, 254, 0.3)'
+              }}
+            >
+              <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#00f2fe', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                📹 RASPBERRY PI AI CAMERA [LIVE]
+              </span>
+              <button 
+                onClick={() => {
+                  setSidebarCctvActive(false);
+                  playTone(220, 0.1);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  lineHeight: '1',
+                  padding: '0.1rem 0.3rem',
+                  transition: 'color 0.15s'
+                }}
+                onMouseOver={(e) => e.target.style.color = '#ef4444'}
+                onMouseOut={(e) => e.target.style.color = '#94a3b8'}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Video Box */}
+            <div style={{ position: 'relative', width: '100%', height: '315px', background: '#000' }}>
+              <img 
+                src={`${API_BASE}/api/cctv/stream/live`} 
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                alt="Tactical live stream"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                  const parent = e.target.parentElement;
+                  const errDiv = document.createElement('div');
+                  errDiv.innerText = "⚠️ 카메라 연결 실패 (백엔드 오프라인)";
+                  errDiv.style.color = "#ef4444";
+                  errDiv.style.fontSize = "0.85rem";
+                  errDiv.style.fontFamily = "monospace";
+                  errDiv.style.position = "absolute";
+                  errDiv.style.top = "50%";
+                  errDiv.style.left = "50%";
+                  errDiv.style.transform = "translate(-50%, -50%)";
+                  parent.appendChild(errDiv);
+                }}
+              />
+              
+              <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.6)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', border: '1px solid rgba(0, 242, 254, 0.3)', color: '#4ade80' }}>
+                ● REC [LIVE]
+              </div>
+              <div style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', color: '#00f2fe' }}>
+                DETECTION: PEDESTRIAN_YOLOv8
+              </div>
+            </div>
+          </div>
+        )}
 
 
 
