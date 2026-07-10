@@ -886,6 +886,7 @@ export default function App() {
   const [floodZones, setFloodZones] = useState([]);
   const [nodes, setNodes] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
+  const [cctvSourceMap, setCctvSourceMap] = useState({});
 
   // Sidebar and widget collapse states
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -2358,15 +2359,79 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                       </h4>
                     </div>
 
-                    {/* Simulated live video feed canvas */}
-                    <CCTVFeed 
-                      stationId={cctv.id} 
-                      name={cctv.name} 
-                      depth={depth} 
-                      people={people} 
-                      status={status} 
-                      lang={lang} 
-                    />
+                    {/* Camera Mode Source Selector */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', fontSize: '0.68rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.3rem' }}>
+                      <span style={{ color: '#94a3b8' }}>AI 카메라 피드 모드:</span>
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <button
+                          onClick={() => setCctvSourceMap(prev => ({ ...prev, [cctv.id]: 'canvas' }))}
+                          style={{
+                            padding: '0.15rem 0.35rem',
+                            fontSize: '0.62rem',
+                            borderRadius: '4px',
+                            border: 'none',
+                            background: (cctvSourceMap[cctv.id] || 'canvas') === 'canvas' ? '#22d3ee' : '#1e293b',
+                            color: (cctvSourceMap[cctv.id] || 'canvas') === 'canvas' ? '#000' : '#94a3b8',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          시뮬레이션
+                        </button>
+                        <button
+                          onClick={() => setCctvSourceMap(prev => ({ ...prev, [cctv.id]: 'hardware' }))}
+                          style={{
+                            padding: '0.15rem 0.35rem',
+                            fontSize: '0.62rem',
+                            borderRadius: '4px',
+                            border: 'none',
+                            background: cctvSourceMap[cctv.id] === 'hardware' ? '#10b981' : '#1e293b',
+                            color: cctvSourceMap[cctv.id] === 'hardware' ? '#000' : '#94a3b8',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          실물 연동 (OpenCV)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Simulated live video feed canvas or actual OpenCV python stream */}
+                    {cctvSourceMap[cctv.id] === 'hardware' ? (
+                      <div style={{ position: 'relative', width: '100%', height: '140px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                        <img 
+                          src={`${API_BASE}/api/cctv/stream/${cctv.id}`} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          alt="CCTV stream"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            const parent = e.target.parentElement;
+                            const errDiv = document.createElement('div');
+                            errDiv.innerText = "⚠️ 카메라 연결 불가 (백엔드 점검 중)";
+                            errDiv.style.color = "#ef4444";
+                            errDiv.style.fontSize = "0.7rem";
+                            errDiv.style.fontFamily = "monospace";
+                            errDiv.style.position = "absolute";
+                            errDiv.style.top = "50%";
+                            errDiv.style.left = "50%";
+                            errDiv.style.transform = "translate(-50%, -50%)";
+                            parent.appendChild(errDiv);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <CCTVFeed 
+                        stationId={cctv.id} 
+                        name={cctv.name} 
+                        depth={depth} 
+                        people={people} 
+                        status={status} 
+                        lang={lang} 
+                      />
+                    )}
 
                     {/* AI Diagnostics status details */}
                     <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>

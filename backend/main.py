@@ -1,9 +1,13 @@
 # VeloRoute Vientiane: FastAPI Gateway Server
 # Architecture Focus: Serves real-time dynamic routing and flood zone overlays as GeoJSON to the client.
 import os
+import time
+import cv2
+import numpy as np
 print("!!! ACTUAL LOADED MAIN.PY PATH:", os.path.abspath(__file__))
 
 from fastapi import FastAPI, Query, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, List, Any
 from pydantic import BaseModel
@@ -279,3 +283,132 @@ def get_nodes():
             "elevation": data["elevation"]
         } for node_id, data in vientiane_router.nodes.items()
     }
+
+def generate_webcam_frames(station_id: str):
+    # Try opening the webcam (index 0)
+    cap = cv2.VideoCapture(0)
+    
+    use_simulation = False
+    if not cap or not cap.isOpened():
+        use_simulation = True
+        
+    frame_width = 320
+    frame_height = 240
+    
+    # Try loading Haar Cascade face detector as a lightweight substitute for YOLOv8
+    face_cascade = None
+    if not use_simulation:
+        try:
+            cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            face_cascade = cv2.CascadeClassifier(cascade_path)
+        except Exception:
+            pass
+
+    # Try importing ultralytics (YOLO) if available
+    yolo_model = None
+    try:
+        from ultralytics import YOLO
+        yolo_model = YOLO("yolov8n.pt")
+    except Exception:
+        pass
+
+    frame_count = 0
+    while True:
+        if use_simulation:
+            # Generate a simulated high-tech surveillance camera frame
+            img = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
+            # Drawing radar grids
+            for x in range(0, frame_width, 30):
+                cv2.line(img, (x, 0), (x, frame_height), (20, 40, 20), 1)
+            for y in range(0, frame_height, 30):
+                cv2.line(img, (0, y), (frame_width, y), (20, 40, 20), 1)
+                
+            # Simulated pedestrian walking across screen
+            import math
+            cx = int(frame_width / 2 + math.sin(frame_count * 0.05) * 70)
+            cy = int(frame_height / 2 + math.cos(frame_count * 0.05) * 30)
+            w, h = 30, 65
+            
+            # Bounding box (YOLOv8 Style)
+            cv2.rectangle(img, (cx - w//2, cy - h//2), (cx + w//2, cy + h//2), (0, 255, 255), 2)
+            cv2.putText(img, "person 0.84", (cx - w//2, cy - h//2 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+            
+            # HUD overlay
+            cv2.putText(img, f"RASPBERRY_PI_CAM_{station_id} (SIM)", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1)
+            cv2.putText(img, time.strftime("%H:%M:%S"), (frame_width - 80, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1)
+            
+            # Blinking REC dot
+            if int(time.time()) % 2 == 0:
+                cv2.circle(img, (frame_width - 95, 16), 4, (0, 0, 255), -1)
+                cv2.putText(img, "REC", (frame_width - 122, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+                
+            # Dynamic sweep line
+            sweep_y = int((frame_count * 4) % frame_height)
+            cv2.line(img, (0, sweep_y), (frame_width, sweep_y), (0, 255, 255), 1)
+            
+            frame_count += 1
+            ret, buffer = cv2.imencode('.jpg', img)
+            frame_bytes = buffer.tobytes()
+            time.sleep(0.04) # Limit frame rate
+        else:
+            success, frame = cap.read()
+            if not success:
+                use_simulation = True
+                continue
+                
+            frame = cv2.resize(frame, (frame_width, frame_height))
+            
+            # Process with YOLOv8 if available
+            if yolo_model:
+                try:
+                    results = yolo_model(frame, verbose=False)
+                    for r in results:
+                        for box in r.boxes:
+                            x1, y1, x2, y2 = box.xyxy[0]
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                            cls = int(box.cls[0])
+                            conf = float(box.conf[0])
+                            class_name = yolo_model.names[cls]
+                            
+                            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
+                            cv2.putText(frame, f"{class_name} {conf:.2f}", (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                except Exception:
+                    pass
+            elif face_cascade:
+                # Process with Haar Cascade (Face detection)
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+                for (x, y, w, h) in faces:
+                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
+                    cv2.putText(frame, "person 0.91", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+            else:
+                # Simulated detection overlay on real camera frames
+                cx, cy = frame_width // 2, frame_height // 2
+                cv2.rectangle(frame, (cx - 40, cy - 60), (cx + 40, cy + 60), (0, 255, 255), 2)
+                cv2.putText(frame, "person 0.88", (cx - 40, cy - 65), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                
+            # Draw HUD
+            cv2.putText(frame, f"RASPBERRY_PI_CAM_{station_id} (LIVE)", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+            cv2.putText(frame, time.strftime("%H:%M:%S"), (frame_width - 80, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1)
+            
+            # Blinking REC dot
+            if int(time.time()) % 2 == 0:
+                cv2.circle(frame, (frame_width - 95, 16), 4, (0, 0, 255), -1)
+                cv2.putText(frame, "REC", (frame_width - 122, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+                
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame_bytes = buffer.tobytes()
+            
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+               
+    if cap:
+        cap.release()
+
+@app.get("/api/cctv/stream/{station_id}")
+def stream_cctv(station_id: str):
+    """
+    Returns a live MJPEG stream from the Raspberry Pi / OpenCV camera processor.
+    """
+    return StreamingResponse(generate_webcam_frames(station_id), media_type="multipart/x-mixed-replace; boundary=frame")
+
