@@ -2077,99 +2077,60 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
           </div>
 
           {/* Selector block */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-              <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>관제 카메라 위치:</span>
-              <select
-                value={sidebarCctvStation}
-                onChange={(e) => {
-                  setSidebarCctvStation(e.target.value);
-                  playTone(440, 0.05);
-                }}
-                disabled={!sidebarCctvActive}
-                style={{
-                  background: '#0f172a',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  fontSize: '0.65rem',
-                  padding: '0.15rem',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {CCTV_STATIONS.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name.split(' CCTV')[0]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-              <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>AI 스트림 소스:</span>
-              <select
-                value={sidebarCctvMode}
-                onChange={(e) => {
-                  setSidebarCctvMode(e.target.value);
-                  playTone(440, 0.05);
-                }}
-                disabled={!sidebarCctvActive}
-                style={{
-                  background: '#0f172a',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  fontSize: '0.65rem',
-                  padding: '0.15rem',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="canvas">시뮬레이션</option>
-                <option value="hardware">실물 연동 (OpenCV)</option>
-              </select>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginBottom: '0.65rem' }}>
+            <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>관제 카메라 위치:</span>
+            <select
+              value={sidebarCctvStation}
+              onChange={(e) => {
+                setSidebarCctvStation(e.target.value);
+                playTone(440, 0.05);
+              }}
+              disabled={!sidebarCctvActive}
+              style={{
+                background: '#0f172a',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '6px',
+                color: '#fff',
+                fontSize: '0.7rem',
+                padding: '0.25rem',
+                outline: 'none',
+                cursor: 'pointer',
+                width: '100%'
+              }}
+            >
+              {CCTV_STATIONS.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {sidebarCctvActive ? (
             <div>
-              {/* Active Player Feed */}
-              {sidebarCctvMode === 'hardware' ? (
-                <div style={{ position: 'relative', width: '100%', height: '140px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                  <img 
-                    src={`${API_BASE}/api/cctv/stream/${sidebarCctvStation}`} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    alt="CCTV stream"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      const parent = e.target.parentElement;
-                      const errDiv = document.createElement('div');
-                      errDiv.innerText = "⚠️ 카메라 연결 불가 (백엔드 점검 중)";
-                      errDiv.style.color = "#ef4444";
-                      errDiv.style.fontSize = "0.7rem";
-                      errDiv.style.fontFamily = "monospace";
-                      errDiv.style.position = "absolute";
-                      errDiv.style.top = "50%";
-                      errDiv.style.left = "50%";
-                      errDiv.style.transform = "translate(-50%, -50%)";
-                      parent.appendChild(errDiv);
-                    }}
-                  />
-                </div>
-              ) : (
-                <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(34, 211, 238, 0.3)' }}>
-                  <CCTVFeed 
-                    stationId={sidebarCctvStation} 
-                    name={CCTV_STATIONS.find(s => s.id === sidebarCctvStation)?.name || `CCTV #${sidebarCctvStation}`} 
-                    depth={getCCTVStatus(sidebarCctvStation).depth} 
-                    people={getCCTVStatus(sidebarCctvStation).people} 
-                    status={getCCTVStatus(sidebarCctvStation).status} 
-                    lang={lang} 
-                  />
-                </div>
-              )}
+              {/* Active OpenCV Python Live Stream Feed */}
+              <div style={{ position: 'relative', width: '100%', height: '180px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(0, 242, 254, 0.4)' }}>
+                <img 
+                  src={`${API_BASE}/api/cctv/stream/${sidebarCctvStation}`} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  alt="CCTV stream"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    const parent = e.target.parentElement;
+                    const errDiv = document.createElement('div');
+                    errDiv.innerText = "⚠️ 카메라 연결 불가 (백엔드 점검 중)";
+                    errDiv.style.color = "#ef4444";
+                    errDiv.style.fontSize = "0.75rem";
+                    errDiv.style.fontFamily = "monospace";
+                    errDiv.style.position = "absolute";
+                    errDiv.style.top = "50%";
+                    errDiv.style.left = "50%";
+                    errDiv.style.transform = "translate(-50%, -50%)";
+                    parent.appendChild(errDiv);
+                  }}
+                />
+              </div>
 
               {/* Status details bar below player */}
               {(() => {
