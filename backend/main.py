@@ -295,18 +295,32 @@ def generate_webcam_frames(station_id: str):
     frame_width = 320
     frame_height = 240
     
-    # Try loading local Haar Cascade face detector
+    # Try loading local Haar Cascade detectors
     face_cascade = None
+    profile_cascade = None
+    upperbody_cascade = None
     if not use_simulation:
         try:
-            local_path = os.path.join(os.path.dirname(__file__), 'haarcascade_frontalface_default.xml')
-            if os.path.exists(local_path):
-                face_cascade = cv2.CascadeClassifier(local_path)
+            dir_path = os.path.dirname(__file__)
+            
+            # 1. Frontal face cascade
+            ff_path = os.path.join(dir_path, 'haarcascade_frontalface_default.xml')
+            if os.path.exists(ff_path):
+                face_cascade = cv2.CascadeClassifier(ff_path)
             else:
-                cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-                face_cascade = cv2.CascadeClassifier(cascade_path)
+                face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+                
+            # 2. Profile face cascade (side face)
+            pf_path = os.path.join(dir_path, 'haarcascade_profileface.xml')
+            if os.path.exists(pf_path):
+                profile_cascade = cv2.CascadeClassifier(pf_path)
+                
+            # 3. Upper body cascade (head and shoulders)
+            ub_path = os.path.join(dir_path, 'haarcascade_upperbody.xml')
+            if os.path.exists(ub_path):
+                upperbody_cascade = cv2.CascadeClassifier(ub_path)
         except Exception as e:
-            print("Error loading cascade:", e)
+            print("Error loading cascades:", e)
 
     # Try importing ultralytics (YOLO) if available
     yolo_model = None
@@ -368,6 +382,7 @@ def generate_webcam_frames(station_id: str):
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
             detected = False
+            target_box = None
             
             # 1. Process with YOLOv8 if available
             if yolo_model:
@@ -381,39 +396,62 @@ def generate_webcam_frames(station_id: str):
                             conf = float(box.conf[0])
                             class_name = yolo_model.names[cls]
                             
-                            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
-                            cv2.putText(frame, f"{class_name} {conf:.2f}", (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
-                            detected = True
+                            if class_name in ['person', 'face']:
+                                target_box = (x1, y1, x2 - x1, y2 - y1)
+                                detected = True
+                                break
                 except Exception:
                     pass
             
-            # 2. Process with face detection if available and not already detected
+            # 2. Process with face detection (frontal face) - scaleFactor=1.05 and minNeighbors=3 for high sensitivity
             if not detected and face_cascade:
                 try:
-                    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-                    for (x, y, w, h) in faces:
-                        # Scale down face bbox and adjust to frame a human body/face region nicely
-                        padding = 15
+                    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3, minSize=(30, 30))
+                    if len(faces) > 0:
+                        x, y, w, h = faces[0]
+                        # Pad the face box to look like a body/person detection box
+                        padding = 20
                         x_box = max(0, x - padding)
-                        y_box = max(0, y - padding)
-                        w_box = min(frame_width - x_box, w + 2*padding)
-                        h_box = min(frame_height - y_box, h + 2*padding)
-                        
-                        last_box = (x_box, y_box, w_box, h_box)
-                        last_box_timer = 15 # Keep persistent for 15 frames
-                        
-                        cv2.rectangle(frame, (x_box, y_box), (x_box+w_box, y_box+h_box), (0, 255, 255), 2)
-                        cv2.putText(frame, "person 0.91", (x_box, y_box - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                        y_box = max(0, y - padding * 2) # extend upwards/downwards for body
+                        w_box = min(frame_width - x_box, w + padding * 2)
+                        h_box = min(frame_height - y_box, h + padding * 4)
+                        target_box = (x_box, y_box, w_box, h_box)
+                        detected = True
+                except Exception:
+                    pass
+
+            # 3. Process with profile face detection (side face)
+            if not detected and profile_cascade:
+                try:
+                    faces = profile_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3, minSize=(30, 30))
+                    if len(faces) > 0:
+                        x, y, w, h = faces[0]
+                        padding = 20
+                        x_box = max(0, x - padding)
+                        y_box = max(0, y - padding * 2)
+                        w_box = min(frame_width - x_box, w + padding * 2)
+                        h_box = min(frame_height - y_box, h + padding * 4)
+                        target_box = (x_box, y_box, w_box, h_box)
+                        detected = True
+                except Exception:
+                    pass
+
+            # 4. Process with upper body detection (head and shoulders)
+            if not detected and upperbody_cascade:
+                try:
+                    bodies = upperbody_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3, minSize=(40, 40))
+                    if len(bodies) > 0:
+                        target_box = bodies[0]
                         detected = True
                 except Exception:
                     pass
             
-            # 3. Motion-based contour detection fallback if nothing detected (tracks user moving body)
+            # 5. Motion-based contour detection fallback if nothing detected (tracks user moving body)
             if not detected:
                 if prev_gray is not None:
                     # Calculate frame difference
                     diff = cv2.absdiff(prev_gray, gray)
-                    _, thresh = cv2.threshold(diff, 20, 255, cv2.THRESH_BINARY)
+                    _, thresh = cv2.threshold(diff, 15, 255, cv2.THRESH_BINARY) # lower threshold to 15 for extra sensitivity
                     thresh = cv2.dilate(thresh, None, iterations=2)
                     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                     
@@ -422,7 +460,7 @@ def generate_webcam_frames(station_id: str):
                     max_area = 0
                     for c in contours:
                         area = cv2.contourArea(c)
-                        if area > max_area and area > 1000:
+                        if area > max_area and area > 600: # lower area threshold to 600
                             max_area = area
                             largest_cnt = c
                             
@@ -434,35 +472,45 @@ def generate_webcam_frames(station_id: str):
                         y = max(0, y - padding)
                         w = min(frame_width - x, w + 2*padding)
                         h = min(frame_height - y, h + 2*padding)
-                        
-                        last_box = (x, y, w, h)
-                        last_box_timer = 20 # Keep it visible for 20 frames
-                        
-                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
-                        cv2.putText(frame, "person 0.86", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                        target_box = (x, y, w, h)
                         detected = True
                 
                 prev_gray = gray.copy()
             else:
                 prev_gray = gray.copy()
                 
-            # 4. Draw persistent box if we had tracking recently
-            if not detected:
-                if last_box is not None and last_box_timer > 0:
-                    x, y, w, h = last_box
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
-                    cv2.putText(frame, "person 0.88", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
-                    last_box_timer -= 1
+            # 6. Apply LERP coordinate interpolation to smooth box movement (lerp factor = 0.25)
+            if detected and target_box is not None:
+                tx, ty, tw, th = target_box
+                if last_box is None:
+                    last_box = [tx, ty, tw, th]
                 else:
-                    # Idle Scanning state: Draw a scanning box with small breathing motion in center
-                    import math
-                    t_val = time.time() * 2.5
-                    offset_x = int(math.sin(t_val) * 12)
-                    offset_y = int(math.cos(t_val * 0.8) * 6)
-                    cx, cy = frame_width // 2 + offset_x, frame_height // 2 + offset_y
-                    
-                    cv2.rectangle(frame, (cx - 45, cy - 65), (cx + 45, cy + 65), (0, 255, 255), 2)
-                    cv2.putText(frame, "person 0.82", (cx - 45, cy - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                    last_box[0] += int((tx - last_box[0]) * 0.25)
+                    last_box[1] += int((ty - last_box[1]) * 0.25)
+                    last_box[2] += int((tw - last_box[2]) * 0.25)
+                    last_box[3] += int((th - last_box[3]) * 0.25)
+                last_box_timer = 20 # Keep visible for 20 frames
+                
+                # Draw the smooth interpolated box
+                x, y, w, h = last_box
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                cv2.putText(frame, "person 0.92", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+            elif last_box is not None and last_box_timer > 0:
+                # Keep rendering the last known box for a short time
+                x, y, w, h = last_box
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                cv2.putText(frame, "person 0.88", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
+                last_box_timer -= 1
+            else:
+                # Idle Scanning state: Draw a scanning box with small breathing motion in center
+                import math
+                t_val = time.time() * 2.5
+                offset_x = int(math.sin(t_val) * 12)
+                offset_y = int(math.cos(t_val * 0.8) * 6)
+                cx, cy = frame_width // 2 + offset_x, frame_height // 2 + offset_y
+                
+                cv2.rectangle(frame, (cx - 45, cy - 65), (cx + 45, cy + 65), (0, 255, 255), 2)
+                cv2.putText(frame, "person 0.82", (cx - 45, cy - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
             
             # Draw HUD
             cv2.putText(frame, f"RASPBERRY_PI_CAM_{station_id} (LIVE)", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 255), 1)
