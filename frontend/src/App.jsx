@@ -2076,42 +2076,12 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
             </button>
           </div>
 
-          {/* Selector block */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginBottom: '0.65rem' }}>
-            <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>관제 카메라 위치:</span>
-            <select
-              value={sidebarCctvStation}
-              onChange={(e) => {
-                setSidebarCctvStation(e.target.value);
-                playTone(440, 0.05);
-              }}
-              disabled={!sidebarCctvActive}
-              style={{
-                background: '#0f172a',
-                border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: '6px',
-                color: '#fff',
-                fontSize: '0.7rem',
-                padding: '0.25rem',
-                outline: 'none',
-                cursor: 'pointer',
-                width: '100%'
-              }}
-            >
-              {CCTV_STATIONS.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {sidebarCctvActive ? (
             <div>
               {/* Active OpenCV Python Live Stream Feed */}
               <div style={{ position: 'relative', width: '100%', height: '180px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(0, 242, 254, 0.4)' }}>
                 <img 
-                  src={`${API_BASE}/api/cctv/stream/${sidebarCctvStation}`} 
+                  src={`${API_BASE}/api/cctv/stream/live`} 
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   alt="CCTV stream"
                   onError={(e) => {
@@ -2131,29 +2101,6 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                   }}
                 />
               </div>
-
-              {/* Status details bar below player */}
-              {(() => {
-                const { depth, people, status } = getCCTVStatus(sidebarCctvStation);
-                const cctvColors = { safe: '#22d3ee', caution: '#eab308', danger: '#ef4444' };
-                const markerColor = cctvColors[status] || '#22d3ee';
-                return (
-                  <div style={{ marginTop: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '6px', fontSize: '0.68rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                      <span style={{ color: '#94a3b8' }}>도로 상태:</span>
-                      <span style={{ fontWeight: 'bold', color: markerColor }}>{t(`cctv_status_${status}`)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                      <span style={{ color: '#94a3b8' }}>침수 수위:</span>
-                      <span style={{ fontWeight: 'bold', color: depth > 0 ? '#ef4444' : '#4ade80' }}>{(depth * 100).toFixed(0)} cm</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#94a3b8' }}>보행자 감지:</span>
-                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{people} 명 (사용자 연동 가능)</span>
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
           ) : (
             <div style={{
