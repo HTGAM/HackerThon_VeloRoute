@@ -887,6 +887,9 @@ export default function App() {
   const [nodes, setNodes] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
   const [cctvSourceMap, setCctvSourceMap] = useState({});
+  const [sidebarCctvActive, setSidebarCctvActive] = useState(false);
+  const [sidebarCctvStation, setSidebarCctvStation] = useState('A');
+  const [sidebarCctvMode, setSidebarCctvMode] = useState('canvas');
 
   // Sidebar and widget collapse states
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
