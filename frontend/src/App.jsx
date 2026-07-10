@@ -2036,6 +2036,181 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
           </div>
         </div>
 
+        {/* Real-time AI CCTV & Camera Monitor Dashboard */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.75)',
+          border: '1.5px solid rgba(0, 242, 254, 0.35)',
+          borderRadius: '12px',
+          padding: '0.75rem',
+          marginTop: '1rem',
+          marginBottom: '1rem',
+          color: '#fff',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '0.4rem', marginBottom: '0.65rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#00f2fe', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              📹 실시간 AI CCTV 관제 모니터
+            </span>
+            <button
+              onClick={() => {
+                setSidebarCctvActive(!sidebarCctvActive);
+                playTone(sidebarCctvActive ? 220 : 660, 0.1);
+              }}
+              style={{
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+                borderRadius: '4px',
+                border: 'none',
+                background: sidebarCctvActive ? '#ef4444' : '#00f2fe',
+                color: '#000',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {sidebarCctvActive ? 'POWER OFF' : 'POWER ON'}
+            </button>
+          </div>
+
+          {/* Selector block */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>관제 카메라 위치:</span>
+              <select
+                value={sidebarCctvStation}
+                onChange={(e) => {
+                  setSidebarCctvStation(e.target.value);
+                  playTone(440, 0.05);
+                }}
+                disabled={!sidebarCctvActive}
+                style={{
+                  background: '#0f172a',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '4px',
+                  color: '#fff',
+                  fontSize: '0.65rem',
+                  padding: '0.15rem',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {CCTV_STATIONS.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name.split(' CCTV')[0]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>AI 스트림 소스:</span>
+              <select
+                value={sidebarCctvMode}
+                onChange={(e) => {
+                  setSidebarCctvMode(e.target.value);
+                  playTone(440, 0.05);
+                }}
+                disabled={!sidebarCctvActive}
+                style={{
+                  background: '#0f172a',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '4px',
+                  color: '#fff',
+                  fontSize: '0.65rem',
+                  padding: '0.15rem',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="canvas">시뮬레이션</option>
+                <option value="hardware">실물 연동 (OpenCV)</option>
+              </select>
+            </div>
+          </div>
+
+          {sidebarCctvActive ? (
+            <div>
+              {/* Active Player Feed */}
+              {sidebarCctvMode === 'hardware' ? (
+                <div style={{ position: 'relative', width: '100%', height: '140px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                  <img 
+                    src={`${API_BASE}/api/cctv/stream/${sidebarCctvStation}`} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    alt="CCTV stream"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      const parent = e.target.parentElement;
+                      const errDiv = document.createElement('div');
+                      errDiv.innerText = "⚠️ 카메라 연결 불가 (백엔드 점검 중)";
+                      errDiv.style.color = "#ef4444";
+                      errDiv.style.fontSize = "0.7rem";
+                      errDiv.style.fontFamily = "monospace";
+                      errDiv.style.position = "absolute";
+                      errDiv.style.top = "50%";
+                      errDiv.style.left = "50%";
+                      errDiv.style.transform = "translate(-50%, -50%)";
+                      parent.appendChild(errDiv);
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(34, 211, 238, 0.3)' }}>
+                  <CCTVFeed 
+                    stationId={sidebarCctvStation} 
+                    name={CCTV_STATIONS.find(s => s.id === sidebarCctvStation)?.name || `CCTV #${sidebarCctvStation}`} 
+                    depth={getCCTVStatus(sidebarCctvStation).depth} 
+                    people={getCCTVStatus(sidebarCctvStation).people} 
+                    status={getCCTVStatus(sidebarCctvStation).status} 
+                    lang={lang} 
+                  />
+                </div>
+              )}
+
+              {/* Status details bar below player */}
+              {(() => {
+                const { depth, people, status } = getCCTVStatus(sidebarCctvStation);
+                const cctvColors = { safe: '#22d3ee', caution: '#eab308', danger: '#ef4444' };
+                const markerColor = cctvColors[status] || '#22d3ee';
+                return (
+                  <div style={{ marginTop: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '6px', fontSize: '0.68rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                      <span style={{ color: '#94a3b8' }}>도로 상태:</span>
+                      <span style={{ fontWeight: 'bold', color: markerColor }}>{t(`cctv_status_${status}`)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                      <span style={{ color: '#94a3b8' }}>침수 수위:</span>
+                      <span style={{ fontWeight: 'bold', color: depth > 0 ? '#ef4444' : '#4ade80' }}>{(depth * 100).toFixed(0)} cm</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#94a3b8' }}>보행자 감지:</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{people} 명 (사용자 연동 가능)</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <div style={{
+              height: '80px',
+              background: 'rgba(255,255,255,0.02)',
+              borderRadius: '8px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              border: '1.5px dashed rgba(255,255,255,0.08)',
+              fontSize: '0.68rem',
+              color: '#94a3b8',
+              textAlign: 'center',
+              padding: '0 1rem',
+              lineHeight: 1.4
+            }}>
+              POWER ON 버튼을 클릭하시면 실시간 AI 객체 감지 및 CCTV 스트림 피드가 시작됩니다.
+            </div>
+          )}
+        </div>
+
         {/* Collapsible Cyber Telemetry Terminal */}
         <details className="telemetry-details">
           <summary className="telemetry-summary">
@@ -2325,159 +2500,6 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
             );
           })}
 
-          {/* Render Raspberry Pi AI CCTV Cameras */}
-          {!isGameMode && CCTV_STATIONS.map((cctv) => {
-            const { depth, people, status } = getCCTVStatus(cctv.id);
-            
-            // Marker colors based on status (Safe: Cyan, Caution: Yellow, Danger: Red)
-            const cctvColors = {
-              safe: '#22d3ee',      // bright cyan
-              caution: '#eab308',   // warning yellow
-              danger: '#ef4444'     // danger red
-            };
-            const markerColor = cctvColors[status] || '#22d3ee';
-            
-            return (
-              <CircleMarker
-                key={cctv.id}
-                center={[cctv.lat, cctv.lng]}
-                radius={10}
-                pathOptions={{
-                  fillColor: markerColor,
-                  fillOpacity: 0.85,
-                  color: '#ffffff',
-                  weight: 2.0
-                }}
-                className="cctv-pulse-marker"
-              >
-                <Popup>
-                  <div style={{ color: '#e2e8f0', fontSize: '0.85rem', width: '260px', background: '#0a0f1d', padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(34, 211, 238, 0.2)', boxSizing: 'border-box' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '0.35rem', marginBottom: '0.5rem' }}>
-                      <Video size={14} style={{ color: '#22d3ee' }} />
-                      <h4 style={{ margin: 0, fontWeight: 700, fontSize: '0.8rem', color: '#fff' }}>
-                        {cctv.name}
-                      </h4>
-                    </div>
-
-                    {/* Camera Mode Source Selector */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', fontSize: '0.68rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.3rem' }}>
-                      <span style={{ color: '#94a3b8' }}>AI 카메라 피드 모드:</span>
-                      <div style={{ display: 'flex', gap: '0.25rem' }}>
-                        <button
-                          onClick={() => setCctvSourceMap(prev => ({ ...prev, [cctv.id]: 'canvas' }))}
-                          style={{
-                            padding: '0.15rem 0.35rem',
-                            fontSize: '0.62rem',
-                            borderRadius: '4px',
-                            border: 'none',
-                            background: (cctvSourceMap[cctv.id] || 'canvas') === 'canvas' ? '#22d3ee' : '#1e293b',
-                            color: (cctvSourceMap[cctv.id] || 'canvas') === 'canvas' ? '#000' : '#94a3b8',
-                            cursor: 'pointer',
-                            fontWeight: 'bold',
-                            transition: 'all 0.15s'
-                          }}
-                        >
-                          시뮬레이션
-                        </button>
-                        <button
-                          onClick={() => setCctvSourceMap(prev => ({ ...prev, [cctv.id]: 'hardware' }))}
-                          style={{
-                            padding: '0.15rem 0.35rem',
-                            fontSize: '0.62rem',
-                            borderRadius: '4px',
-                            border: 'none',
-                            background: cctvSourceMap[cctv.id] === 'hardware' ? '#10b981' : '#1e293b',
-                            color: cctvSourceMap[cctv.id] === 'hardware' ? '#000' : '#94a3b8',
-                            cursor: 'pointer',
-                            fontWeight: 'bold',
-                            transition: 'all 0.15s'
-                          }}
-                        >
-                          실물 연동 (OpenCV)
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Simulated live video feed canvas or actual OpenCV python stream */}
-                    {cctvSourceMap[cctv.id] === 'hardware' ? (
-                      <div style={{ position: 'relative', width: '100%', height: '140px', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                        <img 
-                          src={`${API_BASE}/api/cctv/stream/${cctv.id}`} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                          alt="CCTV stream"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.style.display = 'none';
-                            const parent = e.target.parentElement;
-                            const errDiv = document.createElement('div');
-                            errDiv.innerText = "⚠️ 카메라 연결 불가 (백엔드 점검 중)";
-                            errDiv.style.color = "#ef4444";
-                            errDiv.style.fontSize = "0.7rem";
-                            errDiv.style.fontFamily = "monospace";
-                            errDiv.style.position = "absolute";
-                            errDiv.style.top = "50%";
-                            errDiv.style.left = "50%";
-                            errDiv.style.transform = "translate(-50%, -50%)";
-                            parent.appendChild(errDiv);
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <CCTVFeed 
-                        stationId={cctv.id} 
-                        name={cctv.name} 
-                        depth={depth} 
-                        people={people} 
-                        status={status} 
-                        lang={lang} 
-                      />
-                    )}
-
-                    {/* AI Diagnostics status details */}
-                    <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.15rem' }}>
-                        <span style={{ color: '#94a3b8' }}>{t('cctv_status')}:</span>
-                        <span style={{ 
-                          fontWeight: 700, 
-                          color: markerColor 
-                        }}>
-                          {t(`cctv_status_${status}`)}
-                        </span>
-                      </div>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.15rem' }}>
-                        <span style={{ color: '#94a3b8' }}>{t('cctv_water')}:</span>
-                        <span style={{ fontWeight: 600, color: depth > 0 ? '#ef4444' : '#4ade80' }}>
-                          {(depth * 100).toFixed(0)} cm
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '0.15rem' }}>
-                        <span style={{ color: '#94a3b8' }}>{t('cctv_people')}:</span>
-                        <span style={{ fontWeight: 600, color: '#fff' }}>
-                          {people} 명
-                        </span>
-                      </div>
-
-                      {/* Descriptive status comment */}
-                      <p style={{ 
-                        margin: '0.35rem 0 0', 
-                        fontSize: '0.68rem', 
-                        lineHeight: 1.35, 
-                        color: status === 'danger' ? '#fca5a5' : (status === 'caution' ? '#fef08a' : '#a7f3d0'),
-                        background: 'rgba(255,255,255,0.03)',
-                        padding: '0.35rem',
-                        borderRadius: '6px',
-                        border: `1px solid ${status === 'danger' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.08)'}`
-                      }}>
-                        {t(`cctv_${status}_desc`)}
-                      </p>
-                    </div>
-                  </div>
-                </Popup>
-              </CircleMarker>
-            );
-          })}
 
           {/* Draw safety route polyline on map */}
           {!isGameMode && routeData && routeData.geojson && (
@@ -2493,8 +2515,7 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
           )}
         </MapContainer>
 
-        {/* Floating User device AI Webcam Dashcam */}
-        <WebcamAICam isSidebarCollapsed={isSidebarCollapsed} />
+
 
         {/* Floating Route Status Overlay */}
         {/* Floating Route Status Overlay */}
