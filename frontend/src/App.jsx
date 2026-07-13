@@ -925,6 +925,31 @@ export default function App() {
   const chatEndRef = useRef(null);
   const chatInputRef = useRef(null);
 
+  // ── Web Audio API Sound Synthesizer ────────────────────────
+  const playTone = useCallback((freq, duration, type = 'sine') => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  }, []);
+
   // CCTV status resolver - declared after state hooks to prevent temporal dead zone (TDZ) reference errors
   const getCCTVStatus = useCallback((nodeId) => {
     const mapping = {
@@ -1128,30 +1153,7 @@ export default function App() {
       });
   }, [activeSnsNode, fetchSnsPosts, playTone]);
 
-  // ── Web Audio API Sound Synthesizer ────────────────────────
-  const playTone = useCallback((freq, duration, type = 'sine') => {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.start();
-      osc.stop(ctx.currentTime + duration);
-    } catch (e) {
-      console.error("Audio error:", e);
-    }
-  }, []);
+
 
   // ── Game Start/Clear/Over/Move Mechanics ───────────────────
   const startGame = (vehicleType) => {
