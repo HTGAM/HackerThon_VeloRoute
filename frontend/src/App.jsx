@@ -1100,6 +1100,30 @@ export default function App() {
       });
   }, [activeSnsNode, newPostNickname, newPostComment, newPostFile, fetchSnsPosts]);
 
+  // Delete a post
+  const handleDeleteSnsPost = useCallback((postId) => {
+    if (!activeSnsNode) return;
+    if (!confirm("정말로 이 사진과 후기를 삭제하시겠습니까?")) return;
+
+    setIsSnsLoading(true);
+    fetch(`${API_BASE}/api/nodes/${activeSnsNode}/posts/${postId}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Delete failed");
+        return res.json();
+      })
+      .then((data) => {
+        fetchSnsPosts(activeSnsNode);
+        playTone(329.63, 0.1);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("삭제 중 에러가 발생했습니다.");
+        setIsSnsLoading(false);
+      });
+  }, [activeSnsNode, fetchSnsPosts]);
+
   // ── Web Audio API Sound Synthesizer ────────────────────────
   const playTone = useCallback((freq, duration, type = 'sine') => {
     try {
@@ -2811,9 +2835,30 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                         </div>
                         <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#e2e8f0' }}>{post.username}</span>
                       </div>
-                      <span style={{ fontSize: '0.62rem', color: '#64748b' }}>
-                        {new Date(post.timestamp).toLocaleDateString()} {new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '0.62rem', color: '#64748b' }}>
+                          {new Date(post.timestamp).toLocaleDateString()} {new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <button
+                          onClick={() => handleDeleteSnsPost(post.id)}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '0.1rem',
+                            transition: 'color 0.15s'
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                          onMouseOut={(e) => e.currentTarget.style.color = '#64748b'}
+                          title="삭제하기"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Image display */}

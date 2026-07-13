@@ -622,3 +622,52 @@ def create_node_post(
         
     return {"status": "success", "post": new_post}
 
+
+@app.delete("/api/nodes/{node_id}/posts/{post_id}")
+def delete_node_post(node_id: str, post_id: str):
+    try:
+        if os.path.exists(POSTS_FILE):
+            with open(POSTS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            data = {}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to read posts database")
+        
+    if node_id not in data:
+        raise HTTPException(status_code=404, detail="Node not found in database")
+        
+    posts = data[node_id]
+    post_to_delete = None
+    for post in posts:
+        if post.get("id") == post_id:
+            post_to_delete = post
+            break
+            
+    if not post_to_delete:
+        raise HTTPException(status_code=404, detail="Post not found")
+        
+    # Delete physical image file
+    image_url = post_to_delete.get("image_url", "")
+    if image_url:
+        relative_path = image_url.lstrip("/")
+        full_path = os.path.join(os.path.dirname(__file__), relative_path)
+        if os.path.exists(full_path):
+            try:
+                os.remove(full_path)
+            except Exception as e:
+                print(f"Failed to delete file {full_path}: {e}")
+                
+    # Remove post record
+    posts.remove(post_to_delete)
+    data[node_id] = posts
+    
+    # Save back to database
+    try:
+        with open(POSTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save posts database: {str(e)}")
+        
+    return {"status": "success", "message": "Post deleted successfully"}
+
