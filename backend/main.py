@@ -6,12 +6,16 @@ import cv2
 import numpy as np
 print("!!! ACTUAL LOADED MAIN.PY PATH:", os.path.abspath(__file__))
 
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, File, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from typing import Dict, List, Any
 from pydantic import BaseModel
 from datetime import datetime
+import json
+import uuid
+import shutil
 
 # Import simulator and router modules
 from telemetry import telemetry_pipeline
@@ -22,6 +26,19 @@ app = FastAPI(
     description="Real-Time Flood-Resilient Routing and Telemetry Engine for Vientiane, Laos",
     version="1.0.0"
 )
+
+# Ensure uploads folder exists and is mounted for static file serving
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# Initialize persistent JSON database for SNS posts
+POSTS_FILE = "posts.json"
+if not os.path.exists(POSTS_FILE):
+    try:
+        with open(POSTS_FILE, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+    except Exception as e:
+        print("Failed to initialize posts.json:", e)
 
 # InMemory hazard reports store
 reported_hazards: List[Dict[str, Any]] = []
@@ -529,4 +546,79 @@ def stream_cctv(station_id: str):
     Returns a live MJPEG stream from the Raspberry Pi / OpenCV camera processor.
     """
     return StreamingResponse(generate_webcam_frames(station_id), media_type="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.get("/api/nodes/{node_id}/posts")
+def get_node_posts(node_id: str):
+    try:
+        if os.path.exists(POSTS_FILE):
+            with open(POSTS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            data = {}
+    except Exception:
+        data = {}
+    
+    posts = data.get(node_id, [])
+    # Sort posts by timestamp descending
+    posts.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    return posts
+
+
+@app.post("/api/nodes/{node_id}/posts")
+def create_node_post(
+    node_id: str,
+    username: str = Form(...),
+    comment: str = Form(...),
+    file: UploadFile = File(...)
+):
+    # Ensure uploads directory exists
+    os.makedirs("uploads", exist_ok=True)
+    
+    # Generate a unique file name
+    file_ext = os.path.splitext(file.filename)[1]
+    if not file_ext:
+        file_ext = ".jpg"
+    unique_filename = f"{uuid.uuid4()}{file_ext}"
+    file_path = os.path.join("uploads", unique_filename)
+    
+    # Save the uploaded file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+        
+    # Create post record
+    post_id = str(uuid.uuid4())
+    new_post = {
+        "id": post_id,
+        "username": username,
+        "comment": comment,
+        "image_url": f"/uploads/{unique_filename}",
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    # Write to database
+    try:
+        if os.path.exists(POSTS_FILE):
+            with open(POSTS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            data = {}
+    except Exception:
+        data = {}
+        
+    if node_id not in data:
+        data[node_id] = []
+        
+    data[node_id].append(new_post)
+    
+    try:
+        with open(POSTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update posts database: {str(e)}")
+        
+    return {"status": "success", "post": new_post}
 

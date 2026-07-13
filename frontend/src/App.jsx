@@ -894,6 +894,17 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // Node SNS Photo Sharing States
+  const [activeSnsNode, setActiveSnsNode] = useState(null);
+  const [snsPosts, setSnsPosts] = useState([]);
+  const [isSnsLoading, setIsSnsLoading] = useState(false);
+  const [newPostNickname, setNewPostNickname] = useState('');
+  const [newPostComment, setNewPostComment] = useState('');
+  const [newPostFile, setNewPostFile] = useState(null);
+  const [snsPos, setSnsPos] = useState({ x: 500, y: 120 });
+  const [isSnsDragging, setIsSnsDragging] = useState(false);
+  const [snsDragStart, setSnsDragStart] = useState({ x: 0, y: 0 });
+
   // Sidebar and widget collapse states
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isWidgetCollapsed, setIsWidgetCollapsed] = useState(false);
@@ -988,6 +999,106 @@ export default function App() {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragStart]);
+
+  // Draggable SNS Window Handlers
+  const handleSnsMouseDown = useCallback((e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+    setIsSnsDragging(true);
+    setSnsDragStart({
+      x: e.clientX - snsPos.x,
+      y: e.clientY - snsPos.y
+    });
+    e.preventDefault();
+  }, [snsPos]);
+
+  useEffect(() => {
+    const handleSnsMouseMove = (e) => {
+      if (!isSnsDragging) return;
+      setSnsPos({
+        x: e.clientX - snsDragStart.x,
+        y: e.clientY - snsDragStart.y
+      });
+    };
+
+    const handleSnsMouseUp = () => {
+      setIsSnsDragging(false);
+    };
+
+    if (isSnsDragging) {
+      document.addEventListener('mousemove', handleSnsMouseMove);
+      document.addEventListener('mouseup', handleSnsMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleSnsMouseMove);
+      document.removeEventListener('mouseup', handleSnsMouseUp);
+    };
+  }, [isSnsDragging, snsDragStart]);
+
+  // Fetch SNS Posts for active node
+  const fetchSnsPosts = useCallback((nodeId) => {
+    setIsSnsLoading(true);
+    fetch(`${API_BASE}/api/nodes/${nodeId}/posts`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        return res.json();
+      })
+      .then((data) => {
+        setSnsPosts(data);
+        setIsSnsLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsSnsLoading(false);
+      });
+  }, []);
+
+  // Upload new post (nickname + comment + photo)
+  const handleUploadSnsPost = useCallback((e) => {
+    e.preventDefault();
+    if (!activeSnsNode) return;
+    if (!newPostNickname.trim()) {
+      alert("닉네임을 입력해주세요!");
+      return;
+    }
+    if (!newPostComment.trim()) {
+      alert("내용을 입력해주세요!");
+      return;
+    }
+    if (!newPostFile) {
+      alert("사진을 등록해주세요!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("username", newPostNickname);
+    formData.append("comment", newPostComment);
+    formData.append("file", newPostFile);
+
+    setIsSnsLoading(true);
+    fetch(`${API_BASE}/api/nodes/${activeSnsNode}/posts`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Upload failed");
+        return res.json();
+      })
+      .then((data) => {
+        setNewPostComment('');
+        setNewPostFile(null);
+        const fileInput = document.getElementById("sns-file-input");
+        if (fileInput) fileInput.value = "";
+        
+        fetchSnsPosts(activeSnsNode);
+        playTone(523.25, 0.1);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("업로드 중 에러가 발생했습니다.");
+        setIsSnsLoading(false);
+      });
+  }, [activeSnsNode, newPostNickname, newPostComment, newPostFile, fetchSnsPosts]);
 
   // ── Web Audio API Sound Synthesizer ────────────────────────
   const playTone = useCallback((freq, duration, type = 'sine') => {
@@ -2348,6 +2459,35 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                         </h4>
                         <p style={{ margin: '0.2rem 0', fontWeight: '600' }}>{getNodeLabel(id) || info.name}</p>
                         <p style={{ fontSize: '0.75rem', color: '#666' }}>{t('node_elevation')}: {info.elevation}m</p>
+                        
+                        {/* SNS 커뮤니티 버튼 */}
+                        <button
+                          onClick={() => {
+                            setActiveSnsNode(id);
+                            fetchSnsPosts(id);
+                            playTone(587.33, 0.08);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.35rem 0.5rem',
+                            marginTop: '0.5rem',
+                            marginBottom: '0.5rem',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold',
+                            backgroundColor: '#10b981',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.3rem',
+                            boxShadow: '0 2px 5px rgba(16, 185, 129, 0.2)'
+                          }}
+                        >
+                          💬 커뮤니티 피드 보기 (SNS)
+                        </button>
                         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.3rem', alignItems: 'center', fontWeight: 'bold', fontSize: '0.8rem', color: id === gamePlayerNode ? '#3b82f6' : (id === gameTargetNode ? '#10b981' : '#666') }}>
                           {id === gamePlayerNode && <span>🚗 {lang === 'ko' ? '내 위치' : 'ຂ້ອຍຢູ່ ນີ້'}</span>}
                           {id === gameTargetNode && <span>🏁 {lang === 'ko' ? '목적지 대피소' : 'ສູນອົບພະຍົບເປົ້າໝາຍ'}</span>}
@@ -2361,6 +2501,34 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                         </h4>
                         <p style={{ margin: '0.2rem 0', fontWeight: '500', lineHeight: 1.2 }}>{getNodeLabel(id) || info.name}</p>
                         <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>{t('node_elevation')}: {info.elevation}m</p>
+                        
+                        {/* SNS 커뮤니티 버튼 */}
+                        <button
+                          onClick={() => {
+                            setActiveSnsNode(id);
+                            fetchSnsPosts(id);
+                            playTone(587.33, 0.08);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.35rem 0.5rem',
+                            marginBottom: '0.65rem',
+                            cursor: 'pointer',
+                            fontSize: '0.78rem',
+                            fontWeight: 'bold',
+                            backgroundColor: '#10b981',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.3rem',
+                            boxShadow: '0 2px 6px rgba(16, 185, 129, 0.2)'
+                          }}
+                        >
+                          💬 커뮤니티 피드 보기 (SNS)
+                        </button>
                         
                         {/* 경로 설정 버튼 */}
                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -2546,6 +2714,233 @@ ${activeRoute ? `- Route Path: ${routeNodes}\n- Route Distance: ${routeData.dist
                 DETECTION: PEDESTRIAN_YOLOv8
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Floating Draggable Node SNS Community Feed Modal */}
+        {activeSnsNode && (
+          <div 
+            style={{
+              position: 'fixed',
+              left: `${snsPos.x}px`,
+              top: `${snsPos.y}px`,
+              width: '450px',
+              height: '550px',
+              background: 'rgba(15, 23, 42, 0.94)',
+              backdropFilter: 'blur(12px)',
+              border: '2px solid #10b981',
+              borderRadius: '16px',
+              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(16, 185, 129, 0.25)',
+              zIndex: 9999,
+              color: '#fff',
+              fontFamily: 'monospace',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Modal Drag Header */}
+            <div 
+              onMouseDown={handleSnsMouseDown}
+              style={{
+                background: 'linear-gradient(90deg, #064e3b, #0f172a)',
+                padding: '0.75rem 1rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'move',
+                userSelect: 'none',
+                borderBottom: '1px solid rgba(16, 185, 129, 0.3)'
+              }}
+            >
+              <span style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                💬 교차로 #{activeSnsNode} 커뮤니티 피드 (SNS)
+              </span>
+              <button 
+                onClick={() => {
+                  setActiveSnsNode(null);
+                  playTone(220, 0.1);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '1.1rem',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  lineHeight: '1',
+                  transition: 'color 0.15s'
+                }}
+                onMouseOver={(e) => e.target.style.color = '#ef4444'}
+                onMouseOut={(e) => e.target.style.color = '#94a3b8'}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Scrollable Feed List */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {isSnsLoading && snsPosts.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem', padding: '2rem 0' }}>
+                  로딩 중...
+                </div>
+              ) : snsPosts.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.8rem', padding: '3rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '10px' }}>
+                  <span>📸 아직 등록된 라이더 사진이 없습니다.</span>
+                  <span>첫 번째 주행 리뷰 사진을 업로드해 보세요!</span>
+                </div>
+              ) : (
+                snsPosts.map((post) => (
+                  <div 
+                    key={post.id} 
+                    style={{
+                      background: 'rgba(30, 41, 59, 0.4)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '12px',
+                      padding: '0.75rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.6rem'
+                    }}
+                  >
+                    {/* User profile bar */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#10b981', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '0.7rem', color: '#fff' }}>
+                          {post.username ? post.username.substring(0, 2).toUpperCase() : 'U'}
+                        </div>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#e2e8f0' }}>{post.username}</span>
+                      </div>
+                      <span style={{ fontSize: '0.62rem', color: '#64748b' }}>
+                        {new Date(post.timestamp).toLocaleDateString()} {new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+
+                    {/* Image display */}
+                    {post.image_url && (
+                      <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', background: '#000', maxHeight: '200px' }}>
+                        <img 
+                          src={`${API_BASE}${post.image_url}`} 
+                          style={{ width: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block' }} 
+                          alt="SNS post upload" 
+                        />
+                      </div>
+                    )}
+
+                    {/* Comment bubble */}
+                    <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>
+                      {post.comment}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Bottom Sticky Upload Form */}
+            <form 
+              onSubmit={handleUploadSnsPost}
+              style={{
+                background: 'rgba(15, 23, 42, 0.98)',
+                borderTop: '1px solid rgba(16, 185, 129, 0.25)',
+                padding: '0.8rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem'
+              }}
+            >
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  placeholder="라이더 닉네임"
+                  value={newPostNickname}
+                  onChange={(e) => setNewPostNickname(e.target.value)}
+                  style={{
+                    flex: 1,
+                    background: '#0f172a',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    fontSize: '0.75rem',
+                    padding: '0.35rem 0.5rem',
+                    outline: 'none'
+                  }}
+                />
+                
+                {/* Custom Styled File Input */}
+                <label 
+                  htmlFor="sns-file-input"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem',
+                    padding: '0.35rem 0.6rem',
+                    background: newPostFile ? '#047857' : 'rgba(255,255,255,0.05)',
+                    border: '1px dashed rgba(255,255,255,0.2)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.7rem',
+                    color: '#e2e8f0',
+                    transition: 'all 0.2s',
+                    width: '130px',
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  📷 {newPostFile ? newPostFile.name : "사진 선택"}
+                </label>
+                <input 
+                  id="sns-file-input"
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => setNewPostFile(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <textarea 
+                  placeholder="주행 경로 리뷰 및 라이딩 후기를 공유해주세요! (최대 100자)"
+                  maxLength={100}
+                  value={newPostComment}
+                  onChange={(e) => setNewPostComment(e.target.value)}
+                  rows={2}
+                  style={{
+                    flex: 1,
+                    background: '#0f172a',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    fontSize: '0.75rem',
+                    padding: '0.35rem 0.5rem',
+                    outline: 'none',
+                    resize: 'none',
+                    fontFamily: 'monospace'
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={isSnsLoading}
+                  style={{
+                    background: '#10b981',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#000',
+                    fontWeight: 'bold',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    padding: '0 0.8rem',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = '#34d399'}
+                  onMouseOut={(e) => e.target.style.background = '#10b981'}
+                >
+                  {isSnsLoading ? "..." : "올리기"}
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
