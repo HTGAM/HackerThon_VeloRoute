@@ -1102,27 +1102,31 @@ export default function App() {
 
   // Delete a post
   const handleDeleteSnsPost = useCallback((postId) => {
+    console.log("Delete button clicked for post:", postId, "on node:", activeSnsNode);
     if (!activeSnsNode) return;
     if (!confirm("정말로 이 사진과 후기를 삭제하시겠습니까?")) return;
 
     setIsSnsLoading(true);
+    console.log("Sending DELETE request to:", `${API_BASE}/api/nodes/${activeSnsNode}/posts/${postId}`);
     fetch(`${API_BASE}/api/nodes/${activeSnsNode}/posts/${postId}`, {
       method: "DELETE",
     })
       .then((res) => {
+        console.log("DELETE response status:", res.status);
         if (!res.ok) throw new Error("Delete failed");
         return res.json();
       })
       .then((data) => {
+        console.log("DELETE response data:", data);
         fetchSnsPosts(activeSnsNode);
         playTone(329.63, 0.1);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("DELETE request failed:", err);
         alert("삭제 중 에러가 발생했습니다.");
         setIsSnsLoading(false);
       });
-  }, [activeSnsNode, fetchSnsPosts]);
+  }, [activeSnsNode, fetchSnsPosts, playTone]);
 
   // ── Web Audio API Sound Synthesizer ────────────────────────
   const playTone = useCallback((freq, duration, type = 'sine') => {
