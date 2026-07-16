@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 print("!!! ACTUAL LOADED MAIN.PY PATH:", os.path.abspath(__file__))
 
-from fastapi import FastAPI, Query, HTTPException, File, UploadFile, Form
+from fastapi import FastAPI, Query, HTTPException, File, UploadFile, Form, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -193,6 +193,33 @@ def remove_hazard(request: HazardRemove):
         raise HTTPException(status_code=404, detail=f"Node {request.node}에 등록된 장애물이 없습니다.")
     return {"success": True, "message": f"Node {request.node}의 장애물이 성공적으로 해제되었습니다."}
 
+# Dictionary to store latest uploaded frame for each CCTV station from Raspberry Pi
+uploaded_frames: Dict[str, np.ndarray] = {}
+
+@app.post("/api/cctv/upload")
+async def upload_cctv_frame(
+    request: Request,
+    station_id: str = Query("A", description="CCTV Station ID (e.g. A, I, Q, V)")
+):
+    try:
+        body = await request.body()
+        nparr = np.frombuffer(body, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if frame is not None:
+            uploaded_frames[station_id] = frame
+            return {"status": "success"}
+        else:
+            raise HTTPException(status_code=400, detail="Invalid image frame")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/cctv/debug")
+def debug_cctv():
+    return {
+        "uploaded_keys": list(uploaded_frames.keys()),
+        "has_frames": {k: v is not None for k, v in uploaded_frames.items()}
+    }
+
 @app.get("/api/flood-zones")
 def get_flood_zones(
     rain_intensity: float = Query(0.0),
@@ -302,12 +329,8 @@ def get_nodes():
     }
 
 def generate_webcam_frames(station_id: str):
-    # Try opening the webcam (index 0)
-    cap = cv2.VideoCapture(0)
-    
+    cap = None
     use_simulation = False
-    if not cap or not cap.isOpened():
-        use_simulation = True
         
     frame_width = 320
     frame_height = 240
@@ -342,10 +365,26 @@ def generate_webcam_frames(station_id: str):
     # Try importing ultralytics (YOLO) if available
     yolo_model = None
     try:
+        import torch
+        # 파이썬 환경에 따라 custom 가중치 파일 로드 시 발생하는 보안 에러 방지용 안전 장치
+        if not hasattr(torch, '_original_load'):
+            torch._original_load = torch.load
+            def safe_torch_load(*args, **kwargs):
+                kwargs['weights_only'] = False
+                return torch._original_load(*args, **kwargs)
+            torch.load = safe_torch_load
+
         from ultralytics import YOLO
-        yolo_model = YOLO("yolov8n.pt")
-    except Exception:
-        pass
+        dir_path = os.path.dirname(__file__)
+        custom_model_path = os.path.abspath(os.path.join(dir_path, '..', 'test', 'best.pt'))
+        if os.path.exists(custom_model_path):
+            print(f"🚀 [AI] Custom YOLO flood detection model found: {custom_model_path}")
+            yolo_model = YOLO(custom_model_path)
+        else:
+            print("💡 [AI] Custom model best.pt not found. Using default yolov8n.pt")
+            yolo_model = YOLO("yolov8n.pt")
+    except Exception as e:
+        print("⚠️ [AI] Failed to initialize YOLO model:", e)
 
     frame_count = 0
     prev_gray = None
@@ -353,7 +392,28 @@ def generate_webcam_frames(station_id: str):
     last_box_timer = 0
     
     while True:
-        if use_simulation:
+        frame = None
+        is_real_frame = False
+
+        # 1. Raspberry Pi 업로드 프레임이 있는 경우 우선 사용 (live 채널 혹은 업로드된 채널 매핑)
+        target_key = None
+        if station_id in uploaded_frames:
+            target_key = station_id
+        elif "live" in uploaded_frames:
+            target_key = "live"
+        elif len(uploaded_frames) > 0:
+            target_key = list(uploaded_frames.keys())[0]
+
+        if target_key is not None:
+            frame = uploaded_frames[target_key].copy()
+            is_real_frame = True
+            # 약간의 딜레이를 주어 CPU 점유율 과부하 방지
+            time.sleep(0.03)
+        else:
+            # 2. 업로드된 외부 프레임이 없으면 로컬 웹캠을 열지 않고 시뮬레이션 모드로 대기 (웹캠 블로킹 방지)
+            use_simulation = True
+
+        if not is_real_frame or frame is None:
             # Generate a simulated high-tech surveillance camera frame
             img = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
             # Drawing radar grids
@@ -390,11 +450,6 @@ def generate_webcam_frames(station_id: str):
             frame_bytes = buffer.tobytes()
             time.sleep(0.04) # Limit frame rate
         else:
-            success, frame = cap.read()
-            if not success:
-                use_simulation = True
-                continue
-                
             frame = cv2.resize(frame, (frame_width, frame_height))
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
@@ -405,20 +460,39 @@ def generate_webcam_frames(station_id: str):
             if yolo_model:
                 try:
                     results = yolo_model(frame, verbose=False)
-                    for r in results:
-                        for box in r.boxes:
-                            x1, y1, x2, y2 = box.xyxy[0]
-                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                            cls = int(box.cls[0])
-                            conf = float(box.conf[0])
-                            class_name = yolo_model.names[cls]
-                            
-                            if class_name in ['person', 'face']:
-                                target_box = (x1, y1, x2 - x1, y2 - y1)
-                                detected = True
-                                break
-                except Exception:
-                    pass
+                    
+                    # 만약 침수 세그멘테이션 모델(best.pt)인 경우 (마스크가 발견되는 경우)
+                    if results[0].masks is not None and len(results[0].masks) > 0:
+                        # 분석 결과(물웅덩이에 색칠된 화면)를 복사하여 프레임으로 설정
+                        plotted = results[0].plot()
+                        frame = cv2.resize(plotted, (frame_width, frame_height))
+                        
+                        # 침수 구역 감지 시 실시간으로 해당 CCTV 노드에 침수 장애물 등록
+                        report_node = target_key if (target_key and target_key != "live") else "A"
+                        existing = next((h for h in reported_hazards if h["node"] == report_node), None)
+                        if not existing:
+                            reported_hazards.append({
+                                "node": report_node,
+                                "hazard_type": "flood",
+                                "timestamp": datetime.now().isoformat()
+                            })
+                        detected = True
+                    else:
+                        # 일반 YOLOv8 탐지 모델인 경우 (사람/얼굴 탐지)
+                        for r in results:
+                            if r.boxes is not None:
+                                for box in r.boxes:
+                                    x1, y1, x2, y2 = box.xyxy[0]
+                                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                                    cls = int(box.cls[0])
+                                    class_name = yolo_model.names[cls]
+                                    
+                                    if class_name in ['person', 'face']:
+                                        target_box = (x1, y1, x2 - x1, y2 - y1)
+                                        detected = True
+                                        break
+                except Exception as e:
+                    print("Error in YOLO inference:", e)
             
             # 2. Process with face detection (frontal face) - scaleFactor=1.05 and minNeighbors=3 for high sensitivity
             if not detected and face_cascade:
@@ -536,9 +610,6 @@ def generate_webcam_frames(station_id: str):
             
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-               
-    if cap:
-        cap.release()
 
 @app.get("/api/cctv/stream/{station_id}")
 def stream_cctv(station_id: str):

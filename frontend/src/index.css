@@ -20,8 +20,8 @@
   --status-danger: #ef4444;
   --status-danger-glow: rgba(239, 68, 68, 0.25);
   
-  --font-display: 'Outfit', 'Inter', system-ui, sans-serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', 'Noto Sans KR', 'Noto Sans Lao', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter', 'Noto Sans KR', 'Noto Sans Lao', system-ui, sans-serif;
 }
 
 * {
